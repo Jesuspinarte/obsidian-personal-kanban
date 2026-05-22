@@ -1,0 +1,57 @@
+@use '../_constants/variables' as *;
+
+.o-card-modal {
+  &__title {
+    outline: none;
+    border-bottom: 1px solid $border-color;
+    padding-bottom: $spacing-sm;
+    margin-bottom: $spacing-lg;
+    cursor: text;
+  }
+
+  &__section {
+    margin-bottom: $spacing-lg;
+
+    h4 {
+      margin-bottom: $spacing-sm;
+    }
+  }
+
+  &__tags-input {
+    width: 100%;
+  }
+
+  &__desc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-sm;
+
+    h4 {
+      margin: 0;
+    }
+  }
+
+  &__desc-textarea {
+    width: 100%;
+    min-height: 150px;
+    resize: vertical;
+    background-color: $bg-primary;
+    padding: $spacing-sm;
+    border: 1px solid $border-color;
+    border-radius: $radius-sm;
+  }
+
+  &__desc-preview {
+    min-height: 150px;
+    background-color: $bg-primary;
+    padding: $spacing-sm;
+    border: 1px solid $border-color;
+    border-radius: $radius-sm;
+    user-select: text;
+
+    p {
+      margin-top: 0;
+    }
+  }
+}

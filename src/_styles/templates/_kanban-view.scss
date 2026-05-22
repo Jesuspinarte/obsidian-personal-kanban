@@ -1,0 +1,42 @@
+@use '../_constants/variables' as *;
+
+.t-kanban-view {
+  flex: 1;
+  padding: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  overflow-x: auto;
+  overflow-y: hidden; // Keeps scroll horizontal
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: $spacing-lg;
+  }
+
+  // Aligns the Toggle Button and the Title
+  &__header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    h2 {
+      margin: 0;
+      outline: none;
+      cursor: text;
+    }
+  }
+
+  // The Magic: Puts columns side by side
+  &__container {
+    display: flex;
+    flex-direction: row; // Forces horizontal alignment
+    gap: 16px;
+    height: 100%;
+    align-items: flex-start;
+    flex-wrap: nowrap; // Prevents columns from dropping to the next line
+    padding-bottom: 20px;
+  }
+}

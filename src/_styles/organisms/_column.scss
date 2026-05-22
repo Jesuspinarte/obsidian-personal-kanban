@@ -1,0 +1,31 @@
+@use '../_constants/variables' as *;
+
+.o-kanban-column {
+  background-color: $bg-secondary;
+  min-width: 300px;
+  width: 300px;
+  flex-shrink: 0; // Prevents the column from shrinking when there are many
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__title {
+    margin: 0;
+    outline: none;
+    cursor: text;
+    flex: 1;
+  }
+
+  &__add-btn {
+    width: 100%;
+    margin-top: $spacing-sm;
+  }
+}

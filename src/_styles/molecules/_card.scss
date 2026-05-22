@@ -1,0 +1,41 @@
+@use '../_constants/variables' as *;
+
+.m-kanban-card {
+  background-color: $bg-primary;
+  border: 1px solid $border-color;
+  padding: 12px;
+  border-radius: $radius-sm;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  &__title {
+    margin: 0;
+    outline: none;
+    flex: 1;
+    cursor: pointer; // Indica que se puede hacer clic
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $accent-color;
+    }
+  }
+
+  &__tags {
+    display: flex;
+    gap: 5px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    background-color: $accent-color;
+    color: $text-on-accent;
+    border-radius: 4px;
+  }
+}

@@ -1,0 +1,50 @@
+@use '../_constants/variables' as *;
+
+.o-kanban-sidebar {
+  width: 250px;
+  border-right: 1px solid $border-color;
+  padding: $spacing-lg $spacing-sm;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+  white-space: nowrap;
+
+  &__title {
+    margin-bottom: $spacing-sm;
+    transition: opacity 0.2s ease;
+  }
+
+  &__btn {
+    width: 100%;
+    text-align: left;
+    transition: opacity 0.2s ease;
+
+    &--active {
+      background-color: $accent-color !important;
+      color: $text-on-accent !important;
+    }
+  }
+
+  &__add-btn {
+    margin-top: auto;
+    transition: opacity 0.2s ease;
+  }
+
+  &--collapsed {
+    width: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    border-right: none;
+
+    /* Hides sidebar */
+    .o-kanban-sidebar__title,
+    .o-kanban-sidebar__btn,
+    .o-kanban-sidebar__add-btn {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+}
