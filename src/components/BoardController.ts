@@ -73,14 +73,25 @@ export default class BoardController {
       const colEl = columnComponent.getColumnElement();
       colEl.setAttribute("draggable", "true");
 
+      // --- DRAG START: Sign this drag as a COLUMN ---
       colEl.addEventListener("dragstart", (e) => {
+        e.stopPropagation();
         e.dataTransfer!.setData("text/plain", JSON.stringify({ type: "COLUMN", index }));
+        e.dataTransfer!.setData("application/x-kanban-column", "true");
       });
 
-      colEl.addEventListener("dragover", (e) => e.preventDefault());
-
-      colEl.addEventListener("drop", async (e) => {
+      // --- DRAG OVER ---
+      colEl.addEventListener("dragover", (e) => {
+        if (!e.dataTransfer?.types.includes("application/x-kanban-column")) return;
         e.preventDefault();
+      });
+
+      // --- DROP ---
+      colEl.addEventListener("drop", async (e) => {
+        if (!e.dataTransfer?.types.includes("application/x-kanban-column")) return;
+        e.preventDefault();
+        e.stopPropagation();
+
         const data = JSON.parse(e.dataTransfer!.getData("text/plain"));
 
         if (data.type === "COLUMN") {

@@ -2,7 +2,6 @@ export interface Card {
   id: string;
   title: string;
   description: string;
-  notes: string;
   tags: string[];
 };
 

@@ -21,27 +21,41 @@ export default class CardController {
 
   public render() {
     const cardEl = this.container.createEl("div", { cls: BEM.BLOCK.CARD });
-    cardEl.setAttribute("draggable", "true"); // Draggable
 
+    cardEl.setAttribute("draggable", "true");
+    cardEl.setAttribute("data-card-id", this.card.id);
+
+    // --- DRAG START ---
     cardEl.addEventListener("dragstart", (e) => {
-      // Save card ID and Col ID
+      e.stopPropagation(); // CRITICAL: Prevents the column from catching this drag event
+
+      cardEl.classList.add("is-dragging");
+
       e.dataTransfer?.setData("text/plain", JSON.stringify({
         type: "CARD",
         cardId: this.card.id,
         fromColId: this.column.id
       }));
+
+      // Custom signature so the column knows we are dragging a CARD, not a COLUMN
+      e.dataTransfer?.setData("application/x-kanban-card", "true");
     });
 
-    const cardHeader = cardEl.createEl("div", { cls: `${BEM.BLOCK.CARD}__header` });
+    // --- DRAG END ---
+    cardEl.addEventListener("dragend", () => {
+      cardEl.classList.remove("is-dragging");
+    });
 
-    // The Title (Clickable)
+    // --- UI RENDERING ---
+    const cardHeader = cardEl.createEl("div", { cls: `${BEM.BLOCK.CARD}__header` });
     const cardTitle = cardHeader.createEl("h4", { text: this.card.title, cls: `${BEM.BLOCK.CARD}__title` });
 
-    cardTitle.onclick = () => {
+    cardTitle.style.cursor = "pointer";
+    cardTitle.onclick = (e) => {
+      if ((e.target as HTMLElement).tagName === "BUTTON") return;
       new CardModal(this.plugin.app, this.card, this.plugin, this.parentView).open();
     };
 
-    // Direct Delete Button
     const deleteCardBtn = cardHeader.createEl("button", { text: "✕", cls: "a-btn--icon delete" });
     deleteCardBtn.onclick = async () => {
       this.column.cards = this.column.cards.filter(c => c.id !== this.card.id);
@@ -49,10 +63,8 @@ export default class CardController {
       this.parentView.render();
     };
 
-    // Render tags on the mini-card
     if (this.card.tags && this.card.tags.length > 0) {
       const tagsContainer = cardEl.createEl("div", { cls: `${BEM.BLOCK.CARD}__tags` });
-
       this.card.tags.forEach(tag => {
         tagsContainer.createEl("span", { text: tag, cls: `${BEM.BLOCK.CARD}__tag` });
       });

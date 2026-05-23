@@ -25,24 +25,51 @@ export default class ColumnController {
   public render() {
     this.columnEl = this.container.createEl("div", { cls: BEM.BLOCK.COLUMN });
 
-    // --- DRAG & DROP EVENT LISTENERS ---
+    // --- CENTRALIZED DRAG & DROP FOR CARDS ---
     this.columnEl.addEventListener("dragover", (e) => {
+      // Only react if what is flying over is a CARD
+      if (!e.dataTransfer?.types.includes("application/x-kanban-card")) return;
+
       e.preventDefault();
+      e.stopPropagation(); // Stop bubbling to the board
+      this.updateDropIndicator(e.clientY);
+    });
+
+    this.columnEl.addEventListener("dragleave", () => {
+      this.clearAllIndicators();
     });
 
     this.columnEl.addEventListener("drop", async (e) => {
+      // Ignore if it's not a CARD
+      if (!e.dataTransfer?.types.includes("application/x-kanban-card")) return;
+
       e.preventDefault();
-      const data = JSON.parse(e.dataTransfer!.getData("text/plain"));
+      e.stopPropagation(); // Stop bubbling to the board
+      this.clearAllIndicators();
+
+      const dataStr = e.dataTransfer!.getData("text/plain");
+      if (!dataStr) return;
+
+      const data = JSON.parse(dataStr);
 
       if (data.type === "CARD") {
         const board = this.plugin.data.boards.find(b => b.id === this.parentView.activeBoardId);
-        const fromCol = board?.columns.find(c => c.id === data.fromColId);
+        if (!board) return;
+
+        const fromCol = board.columns.find(c => c.id === data.fromColId);
         const toCol = this.col;
 
-        if (fromCol && toCol && fromCol.id !== toCol.id) {
-          const cardIndex = fromCol.cards.findIndex(c => c.id === data.cardId);
-          const [card] = fromCol.cards.splice(cardIndex, 1);
-          toCol.cards.push(card);
+        if (fromCol && toCol) {
+          const insertIndex = this.getInsertIndex(e.clientY);
+
+          const draggedIndex = fromCol.cards.findIndex(c => c.id === data.cardId);
+          if (draggedIndex === -1) return;
+
+          // 1. Remove from source array
+          const [draggedCard] = fromCol.cards.splice(draggedIndex, 1);
+
+          // 2. Insert into target array at specific position
+          toCol.cards.splice(insertIndex, 0, draggedCard);
 
           await this.plugin.saveSettings();
           this.parentView.render();
@@ -54,6 +81,61 @@ export default class ColumnController {
     this.renderCards(this.columnEl);
     this.renderFooter(this.columnEl);
   }
+
+  //#region D&D Math & Logic
+  private clearAllIndicators() {
+    const cards = this.columnEl.querySelectorAll(`.${BEM.BLOCK.CARD}`);
+    cards.forEach(card => {
+      (card as HTMLElement).style.borderTop = "";
+      (card as HTMLElement).style.borderBottom = "";
+    });
+  }
+
+  private updateDropIndicator(mouseY: number) {
+    this.clearAllIndicators();
+
+    const cardElements = Array.from(this.columnEl.querySelectorAll(`.${BEM.BLOCK.CARD}:not(.is-dragging)`));
+    let closestOffset = Number.NEGATIVE_INFINITY;
+    let closestChild: HTMLElement | null = null;
+
+    cardElements.forEach((child) => {
+      const box = (child as HTMLElement).getBoundingClientRect();
+      const offset = mouseY - box.top - box.height / 2;
+
+      if (offset < 0 && offset > closestOffset) {
+        closestOffset = offset;
+        closestChild = child as HTMLElement;
+      }
+    });
+
+    if (closestChild) {
+      closestChild.style.borderTop = "2px solid var(--interactive-accent)";
+    } else {
+      const lastCard = cardElements[cardElements.length - 1] as HTMLElement;
+      if (lastCard) {
+        lastCard.style.borderBottom = "2px solid var(--interactive-accent)";
+      }
+    }
+  }
+
+  private getInsertIndex(mouseY: number): number {
+    const cardElements = Array.from(this.columnEl.querySelectorAll(`.${BEM.BLOCK.CARD}:not(.is-dragging)`));
+    let closestOffset = Number.NEGATIVE_INFINITY;
+    let closestIndex = cardElements.length;
+
+    cardElements.forEach((child, index) => {
+      const box = (child as HTMLElement).getBoundingClientRect();
+      const offset = mouseY - box.top - box.height / 2;
+
+      if (offset < 0 && offset > closestOffset) {
+        closestOffset = offset;
+        closestIndex = index;
+      }
+    });
+
+    return closestIndex;
+  }
+  //#endregion
 
   private renderHeader(columnEl: HTMLElement) {
     const headerContainer = columnEl.createEl("div", { cls: `${BEM.BLOCK.COLUMN}__header` });
