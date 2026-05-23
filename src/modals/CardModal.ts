@@ -8,6 +8,7 @@ import { EditorView, keymap } from "@codemirror/view";
 import { EditorState, EditorSelection } from "@codemirror/state";
 import { markdown } from "@codemirror/lang-markdown";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import ConfirmModal from "./ConfirmModal";
 
 export default class CardModal extends Modal {
   private card: Card;
@@ -61,13 +62,13 @@ export default class CardModal extends Modal {
     const deleteBtn = titleGroup.createEl("button", { cls: "o-card-modal__delete-btn" });
     setIcon(deleteBtn, "trash-2");
 
-    deleteBtn.onclick = async () => {
-      if (confirm(`Delete "${this.card.title}"?`)) {
+    deleteBtn.onclick = () => {
+      new ConfirmModal(this.plugin.app, `Delete "${this.card.title}"?`, async () => {
         this.column.cards = this.column.cards.filter(c => c.id !== this.card.id);
         await this.plugin.saveSettings();
         this.parentView.render();
         this.close();
-      }
+      }).open();
     };
 
     mainEl.createEl("h4", { text: "Tags", cls: "o-card-modal__section-title" });
@@ -245,7 +246,7 @@ export default class CardModal extends Modal {
       } else {
         const comp = new Component();
         comp.load();
-        await MarkdownRenderer.renderMarkdown(this.card.description, this.previewContainer, "", comp);
+        await MarkdownRenderer.render(this.app, this.card.description, this.previewContainer, "", comp);
       }
     } else {
       this.previewTab.classList.remove("is-active");

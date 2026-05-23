@@ -4,6 +4,7 @@ import KanbanView from "views/KanbanView";
 import { BEM } from "utils/constants";
 import CardModal from "modals/CardModal";
 import { setIcon } from "obsidian";
+import ConfirmModal from "modals/ConfirmModal";
 
 export default class CardController {
   private card: Card;
@@ -54,12 +55,13 @@ export default class CardController {
     const deleteCardBtn = cardHeader.createEl("button", { cls: `${BEM.MOLS.CARD}__delete-btn` });
     setIcon(deleteCardBtn, "trash-2");
 
-    deleteCardBtn.onclick = async () => {
-      if (confirm(`Delete "${this.card.title}"?`)) {
+    deleteCardBtn.onclick = (e) => {
+      e.stopPropagation();
+      new ConfirmModal(this.plugin.app, `Delete "${this.card.title}"?`, async () => {
         this.column.cards = this.column.cards.filter(c => c.id !== this.card.id);
         await this.plugin.saveSettings();
         this.parentView.render();
-      }
+      }).open();
     };
 
     if (this.card.tags && this.card.tags.length > 0) {

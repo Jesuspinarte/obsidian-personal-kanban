@@ -5,6 +5,7 @@ import { BEM } from "utils/constants";
 import CardController from "./CardController";
 import CardModal from "modals/CardModal";
 import { setIcon } from "obsidian";
+import ConfirmModal from "modals/ConfirmModal";
 
 export default class ColumnController {
   private col: Column;
@@ -132,7 +133,6 @@ export default class ColumnController {
   private renderHeader(columnEl: HTMLElement) {
     const headerContainer = columnEl.createEl("div", { cls: `${BEM.ORGS.COLUMN}__header` });
 
-    // Title Group Container (Hover controls visibility)
     const titleGroup = headerContainer.createEl("div", { cls: `${BEM.ORGS.COLUMN}__title-group` });
     const titleEl = titleGroup.createEl("h3", { text: this.col.title, cls: `${BEM.ORGS.COLUMN}__title` });
 
@@ -159,26 +159,23 @@ export default class ColumnController {
     if (!this.isLocked) {
       const actions = titleGroup.createEl("div", { cls: `${BEM.ORGS.COLUMN}__actions` });
 
-      // Move Icon Button
       const moveIconBtn = actions.createEl("button", { cls: `${BEM.ORGS.COLUMN}__icon-btn` });
       setIcon(moveIconBtn, "arrow-right-left");
 
-      // Trash Icon Button
       const deleteBtn = actions.createEl("button", { cls: `${BEM.ORGS.COLUMN}__icon-btn ${BEM.ORGS.COLUMN}__icon-btn--delete` });
       setIcon(deleteBtn, "trash-2");
 
-      deleteBtn.onclick = async () => {
-        if (confirm(`Delete column "${this.col.title}" and all its cards?`)) {
+      deleteBtn.onclick = () => {
+        new ConfirmModal(this.plugin.app, `Delete column "${this.col.title}" and all its cards?`, async () => {
           const activeBoard = this.plugin.data.boards.find(b => b.id === this.parentView.activeBoardId);
           if (activeBoard) {
             activeBoard.columns = activeBoard.columns.filter(c => c.id !== this.col.id);
             await this.plugin.saveSettings();
             this.parentView.render();
           }
-        }
+        }).open();
       };
 
-      // --- Dropdown Move Panel (Hidden by default) ---
       const movePanel = headerContainer.createEl("div", { cls: `${BEM.ORGS.COLUMN}__move-panel` });
 
       const moveSelect = movePanel.createEl("select", { cls: "dropdown" });
@@ -208,7 +205,6 @@ export default class ColumnController {
       const cancelMoveBtn = movePanel.createEl("button", { cls: "a-btn--icon" });
       setIcon(cancelMoveBtn, "x");
 
-      // Click outside and toggle logic
       const closePanel = () => {
         movePanel.classList.remove("is-visible");
         document.removeEventListener("click", outsideClickListener);
@@ -236,10 +232,13 @@ export default class ColumnController {
 
   private renderCardCreationInput(columnEl: HTMLElement) {
     const inputContainer = columnEl.createEl("div", { cls: `${BEM.ORGS.COLUMN}__input-container` });
+    const inputId = `kanban-new-card-input-${this.col.id}`;
+
     const input = inputContainer.createEl("input", {
       type: "text",
       placeholder: "Type to add a new task...",
-      cls: `${BEM.ORGS.COLUMN}__input`
+      cls: `${BEM.ORGS.COLUMN}__input`,
+      attr: { id: inputId }
     });
 
     input.addEventListener("drop", (e) => e.preventDefault());
@@ -263,6 +262,10 @@ export default class ColumnController {
             new CardModal(this.plugin.app, newCard, this.col, this.plugin, this.parentView).open();
           } else {
             this.parentView.render();
+            setTimeout(() => {
+              const el = document.getElementById(inputId);
+              if (el) el.focus();
+            }, 10);
           }
         }
       }

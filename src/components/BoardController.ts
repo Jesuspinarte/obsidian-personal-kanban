@@ -32,10 +32,8 @@ export default class BoardController {
     const header = this.container.createEl("div", { cls: `${BEM.TEMPS.VIEW}__header` });
     const leftGroup = header.createEl("div", { cls: `${BEM.TEMPS.VIEW}__header-left` });
 
-    // Collapsible sidebar button using native chevron icon
     const toggleBtn = leftGroup.createEl("button", { cls: "a-btn--icon m-kanban-toggle-sidebar" });
 
-    // Check current state to apply the correct initial icon
     const sidebar = this.parentView.containerEl.querySelector(`.${BEM.ORGS.SIDEBAR}`);
     const isCurrentlyCollapsed = sidebar?.classList.contains(`${BEM.ORGS.SIDEBAR}--collapsed`);
     setIcon(toggleBtn, isCurrentlyCollapsed ? "chevron-right" : "chevron-left");
@@ -44,15 +42,12 @@ export default class BoardController {
       const currentSidebar = this.parentView.containerEl.querySelector(`.${BEM.ORGS.SIDEBAR}`);
       if (currentSidebar) {
         const isCollapsed = currentSidebar.classList.toggle(`${BEM.ORGS.SIDEBAR}--collapsed`);
-        // Smoothly animate the chevron switch native to Obsidian
         setIcon(toggleBtn, isCollapsed ? "chevron-right" : "chevron-left");
       }
     };
 
-    // Board title justified left
     const titleEl = leftGroup.createEl("h2", { text: board.title });
     titleEl.setAttribute("contenteditable", "true");
-
     titleEl.addEventListener("drop", (e) => e.preventDefault());
 
     titleEl.addEventListener("blur", async () => {
@@ -134,7 +129,8 @@ export default class BoardController {
     const ghostInput = ghostCol.createEl("input", {
       type: "text",
       placeholder: "Type to add a new column...",
-      cls: `${BEM.ORGS.COLUMN}__input`
+      cls: `${BEM.ORGS.COLUMN}__input`,
+      attr: { id: "kanban-new-col-input" }
     });
 
     ghostInput.addEventListener("drop", (e) => e.preventDefault());
@@ -151,6 +147,11 @@ export default class BoardController {
           });
           await this.plugin.saveSettings();
           this.parentView.render();
+
+          setTimeout(() => {
+            const el = document.getElementById("kanban-new-col-input");
+            if (el) el.focus();
+          }, 10);
         }
       }
     });

@@ -1,90 +1,32 @@
-# Obsidian Sample Plugin
+# Personal Kanban for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+I wanted to have my own personal Kanban because Trello, Jira, Monday, and those kinds of tools are either expensive or overkill. I just wanted something simple for my personal projects without the need to go on the web, log in, deal with loading screens, or get a bunch of spam emails. This is just for simple stuff. If you need a straightforward, local, and fast Kanban board right inside your notes, this is for you.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## ⚠️ Disclaimer: Built with "Vibe Coding"
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+**!!! Be ware:** This plugin was made heavily relying on AI (Vibe Coding). Why? I have 7+ years of experience with web development, but right now I'm focusing my personal time on game dev projects. I was not gonna learn how to code an Obsidian plugin from the ground up just for a personal tool. I wanted something quick.
 
-## First time developing plugins?
+I don't know if it's 100% reliable yet, which is why I'm keeping it in an **Alpha version**. I plan to properly review the code and do a heavy refactor later when I have more time. However, this is not a project that AI gave me in a single prompt; I spent time debugging, fixing DOM event bubbling, adjusting CSS for a Trello-like feel, and giving strict architectural direction. Use it, enjoy it, but know it's a work in progress.
 
-Quick starting guide for new plugin devs:
+## ✨ Features
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+- **Multiple Boards Management:** Create and manage several independent Kanban boards from a collapsible sidebar.
+- **Trello-like UI/UX:** Clean, minimalist design that feels native to Obsidian but modern.
+- **Full Drag & Drop:** Smooth DnD functionality to reorder cards within columns, move cards between columns, reorder columns, and even reorder your boards in the sidebar.
+- **Smart Columns:** Columns have quick-add inputs for tasks. Every board starts with a default "To do..." column.
+- **Detailed Card Modal (70/30 Layout):** Clicking a card opens a modal where you can edit the title, add tags, and write a full Markdown description (with Preview/Write tabs).
+- **Cross-Board Transfers:** Move a card from one board to a specific column in another board with a couple of clicks.
+- **Keyboard Friendly:** Press `Enter` to create cards, columns, and boards instantly without leaving the keyboard.
+- **Native Obsidian Integration:** Uses Obsidian's native icons, variables, and modals so it adapts perfectly to your light/dark themes.
 
-## Releasing new releases
+## 🐛 Issues & Feature Requests
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+If you want a new functionality, have an idea to make the code better, or if you see a bug, please [raise an issue](https://github.com/Jesuspinarte/obsidian-personal-kanban/issues) in this repository.
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+## ☕ Support
 
-## Adding your plugin to the community plugin list
+If you find this plugin useful for your own projects and want to buy me a coffee to help me dedicate more time to maintaining and refactoring it, you can do it here:
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
-
-If you have multiple URLs, you can also do:
-
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
-
-## API Documentation
-
-See https://docs.obsidian.md
+<a target="_blank" href="https://ko-fi.com/jesuspinarte" alt="Ko-Fi support">
+    <img src="https://cdn.prod.website-files.com/5c14e387dab576fe667689cf/670f5a01c01ea919180939bc_support_me_on_kofi_badge_blue.png" alt="ko-fi" width="200"/>
+</a>

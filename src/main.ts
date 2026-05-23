@@ -5,10 +5,8 @@ import { PluginData } from 'types/interfaces';
 import { PERSONAL_KANBAN_VIEW_TYPE } from 'utils/constants';
 import KanbanView from 'views/KanbanView';
 
-// Remember to rename these classes and interfaces!
-
 export default class PersonalKanbanPlugin extends Plugin {
-	data: PluginData; // ! WHY??
+	data: PluginData;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();

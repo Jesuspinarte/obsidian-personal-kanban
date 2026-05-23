@@ -3,6 +3,7 @@ import { Board } from "types/interfaces";
 import { BEM } from "utils/constants";
 import KanbanView from "views/KanbanView";
 import { setIcon } from "obsidian";
+import ConfirmModal from "modals/ConfirmModal"; // Añadida la importación
 
 export default class SidebarController {
   private container: HTMLElement;
@@ -24,18 +25,23 @@ export default class SidebarController {
 
   private renderSettingsToggle() {
     const toggleContainer = this.container.createEl("div", { cls: "m-board-item-list__toggle-container" });
-    toggleContainer.createEl("label", { text: "Auto-open card modal" });
-    const toggle = toggleContainer.createEl("input", { type: "checkbox" });
+    toggleContainer.createEl("span", { text: "Auto-open card modal" });
+
+    // --- NATIVE OBSIDIAN TOGGLE ---
+    const toggleBtn = toggleContainer.createEl("div", { cls: "checkbox-container" });
 
     if (!this.plugin.data.settings) {
       this.plugin.data.settings = { openModalOnCreate: false };
     }
 
-    toggle.checked = this.plugin.data.settings.openModalOnCreate;
+    if (this.plugin.data.settings.openModalOnCreate) {
+      toggleBtn.classList.add("is-enabled");
+    }
 
-    toggle.onchange = async () => {
+    toggleBtn.onclick = async () => {
+      const isEnabled = toggleBtn.classList.toggle("is-enabled");
       if (this.plugin.data.settings) {
-        this.plugin.data.settings.openModalOnCreate = toggle.checked;
+        this.plugin.data.settings.openModalOnCreate = isEnabled;
         await this.plugin.saveSettings();
       }
     };
@@ -45,7 +51,8 @@ export default class SidebarController {
     const input = this.container.createEl("input", {
       type: "text",
       placeholder: "Type to add board...",
-      cls: "m-board-item-list__input"
+      cls: "m-board-item-list__input",
+      attr: { id: "kanban-new-board-input" }
     });
 
     input.addEventListener("drop", (e) => e.preventDefault());
@@ -64,6 +71,11 @@ export default class SidebarController {
           this.parentView.activeBoardId = newBoard.id;
           await this.plugin.saveSettings();
           this.parentView.render();
+
+          setTimeout(() => {
+            const el = document.getElementById("kanban-new-board-input");
+            if (el) el.focus();
+          }, 10);
         }
       }
     });
@@ -74,16 +86,15 @@ export default class SidebarController {
       const itemEl = this.container.createEl("div", { cls: "m-board-item-list__item" });
       itemEl.setAttribute("draggable", "true");
 
-      // Board Title aligned to the left
       const titleEl = itemEl.createEl("span", { text: board.title, cls: "m-board-item-list__item-title" });
 
-      // Delete Button with Obsidian native Trash icon aligned to the right
       const deleteBtn = itemEl.createEl("button", { cls: "m-board-item-list__delete-btn" });
       setIcon(deleteBtn, "trash-2");
 
-      deleteBtn.onclick = async (e) => {
+      // --- CUSTOM CONFIRM MODAL ---
+      deleteBtn.onclick = (e) => {
         e.stopPropagation();
-        if (confirm(`Are you sure you want to delete "${board.title}"?`)) {
+        new ConfirmModal(this.plugin.app, `Are you sure you want to delete "${board.title}"?`, async () => {
           this.plugin.data.boards = this.plugin.data.boards.filter(b => b.id !== board.id);
 
           if (this.parentView.activeBoardId === board.id) {
@@ -92,7 +103,7 @@ export default class SidebarController {
 
           await this.plugin.saveSettings();
           this.parentView.render();
-        }
+        }).open();
       };
 
       titleEl.onclick = () => {

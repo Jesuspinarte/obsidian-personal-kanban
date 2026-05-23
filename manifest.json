@@ -1,11 +1,11 @@
 {
 	"id": "personal-kanban",
 	"name": "Personal Kanban",
-	"version": "0.0.1",
+	"version": "0.1.0-alpha",
 	"minAppVersion": "0.15.0",
 	"description": "A simple plugin to manage your personal projects with a Kanban Board.",
 	"author": "Jesuspinarte",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"authorUrl": "https://github.com/Jesuspinarte",
+	"fundingUrl": "https://ko-fi.com/jesuspinarte",
 	"isDesktopOnly": false
 }

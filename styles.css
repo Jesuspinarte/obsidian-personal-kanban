@@ -394,6 +394,7 @@ button.a-btn--icon.delete {
   flex: 1;
   cursor: text;
   font-weight: 600;
+  color: var(--text-normal);
 }
 .o-card-modal__delete-btn {
   background: transparent !important;
@@ -497,6 +498,7 @@ button.a-btn--icon.delete {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
+  color: var(--text-muted);
 }
 .o-card-modal__controls {
   display: flex;
@@ -535,6 +537,7 @@ button.a-btn--icon.delete {
   font-size: 14px;
   font-weight: 600;
   margin: 0 0 10px 0;
+  color: var(--text-muted);
 }
 .o-card-modal {
   /* --- Avatar INSIDE the Input Wrapper --- */
