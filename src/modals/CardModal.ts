@@ -219,7 +219,7 @@ export default class CardModal extends Modal {
       } else {
         const comp = new Component();
         comp.load();
-        await MarkdownRenderer.renderMarkdown(this.card.description, this.previewContainer, "", comp);
+        await MarkdownRenderer.render(this.app, this.card.description, this.previewContainer, "", comp);
       }
     } else {
       this.previewTab.classList.remove("is-active");

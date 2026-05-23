@@ -10,6 +10,11 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-sm;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
 
   &__header {
     display: flex;

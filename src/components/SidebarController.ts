@@ -24,15 +24,53 @@ export default class SidebarController {
    * Renders the kanban boards list
    */
   private renderBoardList() {
-    this.plugin.data.boards.forEach((board: Board) => {
+    this.plugin.data.boards.forEach((board, index) => {
       const btn = this.container.createEl("button", { text: board.title, cls: `${BEM.BLOCK.SIDEBAR}__btn` });
+      btn.setAttribute("draggable", "true");
+
+      // 1. Drag Start: Identify which board is being moved
+      btn.addEventListener("dragstart", (e) => {
+        e.dataTransfer!.setData("text/plain", index.toString());
+        btn.style.opacity = "0.5"; // Visual feedback
+      });
+
+      btn.addEventListener("dragend", () => {
+        btn.style.opacity = "1";
+      });
+
+      // 2. Drag Over: Necessary to allow dropping
+      btn.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        btn.style.borderTop = "2px solid var(--interactive-accent)"; // Visual feedback
+      });
+
+      btn.addEventListener("dragleave", () => {
+        btn.style.borderTop = "";
+      });
+
+      // 3. Drop: Perform the reorder
+      btn.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        btn.style.borderTop = "";
+
+        const draggedIndex = parseInt(e.dataTransfer!.getData("text/plain"));
+        const targetIndex = index;
+
+        if (draggedIndex !== targetIndex) {
+          const boards = this.plugin.data.boards;
+          const [removed] = boards.splice(draggedIndex, 1);
+          boards.splice(targetIndex, 0, removed);
+
+          await this.plugin.saveSettings();
+          this.parentView.render();
+        }
+      });
 
       // Highlights active board
       if (board.id === this.parentView.activeBoardId) {
         btn.classList.add(`${BEM.BLOCK.SIDEBAR}__btn--active`);
       }
 
-      // Board changed by the OnClick event
       btn.onclick = () => {
         this.parentView.activeBoardId = board.id;
         this.parentView.render();

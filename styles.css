@@ -52,6 +52,10 @@ button.a-btn--icon.delete {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  cursor: grab;
+}
+.o-kanban-column:active {
+  cursor: grabbing;
 }
 .o-kanban-column__header {
   display: flex;

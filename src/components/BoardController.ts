@@ -18,7 +18,6 @@ export default class BoardController {
   public render() {
     const activeBoard = this.plugin.data.boards.find(b => b.id === this.parentView.activeBoardId);
 
-    // Renders a fallback message if there is no active board
     if (!activeBoard) {
       this.container.createEl("h2", { text: "Select or create a new board." });
       return;
@@ -28,47 +27,27 @@ export default class BoardController {
     this.renderColumns(activeBoard);
   }
 
-  /**
-   * Renders the board Header
-   * @param board Current active board
-   */
   private renderBoardHeader(board: Board) {
     const header = this.container.createEl("div", { cls: `${BEM.BLOCK.VIEW}__header` });
-
-    // Toggle button
     const leftGroup = header.createEl("div", { cls: `${BEM.BLOCK.VIEW}__header-left` });
 
-    // Collapse/Expand button
     const toggleBtn = leftGroup.createEl("button", { text: "☰", cls: "a-btn--icon" });
     toggleBtn.onclick = () => {
-      // We get the sidebar from the dom and toggle the class
       const sidebar = this.parentView.containerEl.querySelector(`.${BEM.BLOCK.SIDEBAR}`);
-      if (sidebar) {
-        sidebar.classList.toggle(`${BEM.BLOCK.SIDEBAR}--collapsed`);
-      }
+      if (sidebar) sidebar.classList.toggle(`${BEM.BLOCK.SIDEBAR}--collapsed`);
     };
 
-    // Makes the title editable
     const titleEl = header.createEl("h2", { text: board.title });
     titleEl.setAttribute("contenteditable", "true");
 
-    // Saves if we click out of the element
     titleEl.addEventListener("blur", async () => {
       const newTitle = titleEl.innerText.trim();
       if (newTitle !== "") {
         board.title = newTitle;
         await this.plugin.saveSettings();
-        this.parentView.render(); // FIX: Changed from this.render() to trigger a full clean re-render
+        this.parentView.render();
       } else {
-        titleEl.innerText = board.title; // If the new title is empty, goes back to the last title
-      }
-    });
-
-    // We save the title on enter
-    titleEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        titleEl.blur();
+        titleEl.innerText = board.title;
       }
     });
 
@@ -84,39 +63,49 @@ export default class BoardController {
     };
   }
 
-  /**
-   * Renders the columns container and maps the column controllers
-   * @param board Current active board
-   */
   private renderColumns(board: Board) {
-    const activeBoard = this.plugin.data.boards.find(b => b.id === this.parentView.activeBoardId)
-
-    // It renders a message if there's no board
-    if (!activeBoard) {
-      this.container.createEl("h2", { text: "Select or create a new board." });
-      return;
-    }
-
-    // Columns container
     const boardContainer = this.container.createEl("div", { cls: `${BEM.BLOCK.VIEW}__container` });
 
-    // Column Controller
-    activeBoard.columns.forEach(col => {
+    board.columns.forEach((col, index) => {
       const columnComponent = new ColumnController(col, boardContainer, this.plugin, this.parentView);
       columnComponent.render();
+
+      const colEl = columnComponent.getColumnElement();
+      colEl.setAttribute("draggable", "true");
+
+      colEl.addEventListener("dragstart", (e) => {
+        e.dataTransfer!.setData("text/plain", JSON.stringify({ type: "COLUMN", index }));
+      });
+
+      colEl.addEventListener("dragover", (e) => e.preventDefault());
+
+      colEl.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        const data = JSON.parse(e.dataTransfer!.getData("text/plain"));
+
+        if (data.type === "COLUMN") {
+          const fromIndex = data.index;
+          const toIndex = index;
+
+          if (fromIndex !== toIndex) {
+            const [removed] = board.columns.splice(fromIndex, 1);
+            board.columns.splice(toIndex, 0, removed);
+            await this.plugin.saveSettings();
+            this.parentView.render();
+          }
+        }
+      });
     });
 
-    // Button to create a new column
     const addColBtn = boardContainer.createEl("button", { text: "+ Add Column" });
     addColBtn.onclick = async () => {
-      const newCol: Column = {
+      board.columns.push({
         id: `col-${Date.now()}`,
         title: "New Column",
         cards: []
-      };
-      activeBoard.columns.push(newCol);
+      });
       await this.plugin.saveSettings();
-      this.parentView.render(); // FIX: Changed from this.render() to trigger a full clean re-render
+      this.parentView.render();
     };
   }
 }

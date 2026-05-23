@@ -1,5 +1,4 @@
-// src/components/ColumnComponent.ts
-import { Column } from "types/interfaces";
+import { Card, Column } from "types/interfaces";
 import PersonalKanbanPlugin from "main";
 import KanbanView from "views/KanbanView";
 import { BEM } from "utils/constants";
@@ -10,6 +9,7 @@ export default class ColumnController {
   private container: HTMLElement;
   private plugin: PersonalKanbanPlugin;
   private parentView: KanbanView;
+  private columnEl: HTMLElement;
 
   constructor(col: Column, container: HTMLElement, plugin: PersonalKanbanPlugin, parentView: KanbanView) {
     this.col = col;
@@ -18,23 +18,46 @@ export default class ColumnController {
     this.parentView = parentView;
   }
 
-  public render() {
-    const columnEl = this.container.createEl("div", { cls: BEM.BLOCK.COLUMN });
-
-    this.renderHeader(columnEl);
-    this.renderCards(columnEl);
-    this.renderFooter(columnEl);
+  public getColumnElement(): HTMLElement {
+    return this.columnEl;
   }
 
-  //#region Render Methods
-  /**
-   * Renders the column title and controls
-   * @param columnEl Column container
-   */
+  public render() {
+    this.columnEl = this.container.createEl("div", { cls: BEM.BLOCK.COLUMN });
+
+    // --- DRAG & DROP EVENT LISTENERS ---
+    this.columnEl.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    });
+
+    this.columnEl.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      const data = JSON.parse(e.dataTransfer!.getData("text/plain"));
+
+      if (data.type === "CARD") {
+        const board = this.plugin.data.boards.find(b => b.id === this.parentView.activeBoardId);
+        const fromCol = board?.columns.find(c => c.id === data.fromColId);
+        const toCol = this.col;
+
+        if (fromCol && toCol && fromCol.id !== toCol.id) {
+          const cardIndex = fromCol.cards.findIndex(c => c.id === data.cardId);
+          const [card] = fromCol.cards.splice(cardIndex, 1);
+          toCol.cards.push(card);
+
+          await this.plugin.saveSettings();
+          this.parentView.render();
+        }
+      }
+    });
+
+    this.renderHeader(this.columnEl);
+    this.renderCards(this.columnEl);
+    this.renderFooter(this.columnEl);
+  }
+
   private renderHeader(columnEl: HTMLElement) {
     const headerContainer = columnEl.createEl("div", { cls: `${BEM.BLOCK.COLUMN}__header` });
 
-    // Makes the title editable
     const titleEl = headerContainer.createEl("h3", { text: this.col.title, cls: `${BEM.BLOCK.COLUMN}__title` });
     titleEl.setAttribute("contenteditable", "true");
 
@@ -57,13 +80,10 @@ export default class ColumnController {
     });
 
     const controls = headerContainer.createEl("div");
-
-    // Delete Column
     const deleteBtn = controls.createEl("button", { text: "✕" });
 
     deleteBtn.onclick = async () => {
       if (confirm(`Delete column "${this.col.title}" and all its cards?`)) {
-        // Find columnb and remove it
         const activeBoard = this.plugin.data.boards.find(b => b.id === this.parentView.activeBoardId);
         if (activeBoard) {
           activeBoard.columns = activeBoard.columns.filter(c => c.id !== this.col.id);
@@ -74,13 +94,8 @@ export default class ColumnController {
     };
   }
 
-  /**
-     * Renders the cards inside the column
-     * @param columnEl Column container
-     */
   private renderCards(columnEl: HTMLElement) {
     this.col.cards.forEach(card => {
-      // Instantiates the new Card Component
       const cardComponent = new CardController(card, this.col, columnEl, this.plugin, this.parentView);
       cardComponent.render();
     });
@@ -94,13 +109,11 @@ export default class ColumnController {
         id: `card-${Date.now()}`,
         title: "New Task",
         description: "",
-        notes: "",
         tags: []
       });
 
       await this.plugin.saveSettings();
       this.parentView.render();
-    }
+    };
   }
-  //#endregion
 }

@@ -21,6 +21,17 @@ export default class CardController {
 
   public render() {
     const cardEl = this.container.createEl("div", { cls: BEM.BLOCK.CARD });
+    cardEl.setAttribute("draggable", "true"); // Draggable
+
+    cardEl.addEventListener("dragstart", (e) => {
+      // Save card ID and Col ID
+      e.dataTransfer?.setData("text/plain", JSON.stringify({
+        type: "CARD",
+        cardId: this.card.id,
+        fromColId: this.column.id
+      }));
+    });
+
     const cardHeader = cardEl.createEl("div", { cls: `${BEM.BLOCK.CARD}__header` });
 
     // The Title (Clickable)
