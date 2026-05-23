@@ -9,49 +9,77 @@
     cursor: text;
   }
 
-  &__section {
-    margin-bottom: $spacing-lg;
-
-    h4 {
-      margin-bottom: $spacing-sm;
-    }
-  }
-
   &__tags-input {
     width: 100%;
   }
 
-  &__desc-header {
+  /* --- Tabs System (GitHub Style) --- */
+  &__desc-section {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: $spacing-sm;
+    flex-direction: column;
+  }
 
-    h4 {
-      margin: 0;
+  &__tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: -1px;
+    /* Pulls the content box up to overlap borders */
+    z-index: 1;
+  }
+
+  &__tab {
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    box-shadow: none;
+
+    &:hover {
+      color: var(--text-normal);
+    }
+
+    &.is-active {
+      background-color: $bg-primary;
+      border-color: $border-color;
+      color: var(--text-normal);
+      font-weight: bold;
     }
   }
 
-  &__desc-textarea {
-    width: 100%;
-    min-height: 150px;
-    resize: vertical;
-    background-color: $bg-primary;
-    padding: $spacing-sm;
+  &__content {
     border: 1px solid $border-color;
-    border-radius: $radius-sm;
+    border-radius: 0 6px 6px 6px;
+    background-color: $bg-primary;
+    overflow: hidden;
   }
 
-  &__desc-preview {
-    min-height: 150px;
-    background-color: $bg-primary;
-    padding: $spacing-sm;
-    border: 1px solid $border-color;
-    border-radius: $radius-sm;
+  &__preview {
+    min-height: 200px;
+    padding: 15px;
+    cursor: pointer;
+    /* Indicates it can be clicked to edit */
     user-select: text;
 
-    p {
+    /* Styling Obsidian's markdown injection */
+    p:first-child {
       margin-top: 0;
     }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
   }
+
+  &__placeholder {
+    color: var(--text-faint);
+    font-style: italic;
+  }
+}
+
+.margin-bottom-md {
+  margin-bottom: $spacing-md;
 }

@@ -118,43 +118,70 @@ button.a-btn--icon.delete {
   margin-bottom: 20px;
   cursor: text;
 }
-.o-card-modal__section {
-  margin-bottom: 20px;
-}
-.o-card-modal__section h4 {
-  margin-bottom: 10px;
-}
 .o-card-modal__tags-input {
   width: 100%;
 }
-.o-card-modal__desc-header {
+.o-card-modal {
+  /* --- Tabs System (GitHub Style) --- */
+}
+.o-card-modal__desc-section {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  flex-direction: column;
 }
-.o-card-modal__desc-header h4 {
-  margin: 0;
+.o-card-modal__tabs {
+  display: flex;
+  gap: 5px;
+  margin-bottom: -1px;
+  /* Pulls the content box up to overlap borders */
+  z-index: 1;
 }
-.o-card-modal__desc-textarea {
-  width: 100%;
-  min-height: 150px;
-  resize: vertical;
+.o-card-modal__tab {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  box-shadow: none;
+}
+.o-card-modal__tab:hover {
+  color: var(--text-normal);
+}
+.o-card-modal__tab.is-active {
   background-color: var(--background-primary);
-  padding: 10px;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 6px;
+  border-color: var(--background-modifier-border);
+  color: var(--text-normal);
+  font-weight: bold;
 }
-.o-card-modal__desc-preview {
-  min-height: 150px;
-  background-color: var(--background-primary);
-  padding: 10px;
+.o-card-modal__content {
   border: 1px solid var(--background-modifier-border);
-  border-radius: 6px;
+  border-radius: 0 6px 6px 6px;
+  background-color: var(--background-primary);
+  overflow: hidden;
+}
+.o-card-modal__preview {
+  min-height: 200px;
+  padding: 15px;
+  cursor: pointer;
+  /* Indicates it can be clicked to edit */
   user-select: text;
+  /* Styling Obsidian's markdown injection */
 }
-.o-card-modal__desc-preview p {
+.o-card-modal__preview p:first-child {
   margin-top: 0;
+}
+.o-card-modal__preview p:last-child {
+  margin-bottom: 0;
+}
+.o-card-modal__placeholder {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.margin-bottom-md {
+  margin-bottom: 15px;
 }
 
 .t-kanban-view {
