@@ -1,3 +1,4 @@
+// ColumnController.ts
 import { Card, Column } from "types/interfaces";
 import PersonalKanbanPlugin from "main";
 import KanbanView from "views/KanbanView";
@@ -26,7 +27,7 @@ export default class ColumnController {
   }
 
   public render() {
-    this.columnEl = this.container.createEl("div", { cls: BEM.BLOCK.COLUMN });
+    this.columnEl = this.container.createEl("div", { cls: BEM.ORGS.COLUMN });
 
     this.columnEl.addEventListener("dragover", (e) => {
       if (!e.dataTransfer?.types.includes("application/x-kanban-card")) return;
@@ -77,7 +78,7 @@ export default class ColumnController {
 
   //#region D&D Math & Logic
   private clearAllIndicators() {
-    const cards = this.columnEl.querySelectorAll(`.${BEM.BLOCK.CARD}`);
+    const cards = this.columnEl.querySelectorAll(`.${BEM.MOLS.CARD}`);
     cards.forEach(card => {
       card.classList.remove("is-drop-target-top", "is-drop-target-bottom");
     });
@@ -85,7 +86,7 @@ export default class ColumnController {
 
   private updateDropIndicator(mouseY: number) {
     this.clearAllIndicators();
-    const cardElements = Array.from(this.columnEl.querySelectorAll(`.${BEM.BLOCK.CARD}:not(.is-dragging)`));
+    const cardElements = Array.from(this.columnEl.querySelectorAll(`.${BEM.MOLS.CARD}:not(.is-dragging)`));
     let closestOffset = Number.NEGATIVE_INFINITY;
     let closestChild: HTMLElement | null = null;
 
@@ -110,7 +111,7 @@ export default class ColumnController {
   }
 
   private getInsertIndex(mouseY: number): number {
-    const cardElements = Array.from(this.columnEl.querySelectorAll(`.${BEM.BLOCK.CARD}:not(.is-dragging)`));
+    const cardElements = Array.from(this.columnEl.querySelectorAll(`.${BEM.MOLS.CARD}:not(.is-dragging)`));
     let closestOffset = Number.NEGATIVE_INFINITY;
     let closestIndex = cardElements.length;
 
@@ -129,8 +130,8 @@ export default class ColumnController {
   //#endregion
 
   private renderHeader(columnEl: HTMLElement) {
-    const headerContainer = columnEl.createEl("div", { cls: `${BEM.BLOCK.COLUMN}__header` });
-    const titleEl = headerContainer.createEl("h3", { text: this.col.title, cls: `${BEM.BLOCK.COLUMN}__title` });
+    const headerContainer = columnEl.createEl("div", { cls: `${BEM.ORGS.COLUMN}__header` });
+    const titleEl = headerContainer.createEl("h3", { text: this.col.title, cls: `${BEM.ORGS.COLUMN}__title` });
 
     titleEl.setAttribute("contenteditable", "true");
 
@@ -196,11 +197,11 @@ export default class ColumnController {
   }
 
   private renderCardCreationInput(columnEl: HTMLElement) {
-    const inputContainer = columnEl.createEl("div", { cls: `${BEM.BLOCK.COLUMN}__input-container` });
+    const inputContainer = columnEl.createEl("div", { cls: `${BEM.ORGS.COLUMN}__input-container` });
     const input = inputContainer.createEl("input", {
       type: "text",
       placeholder: "Type to add a new task...",
-      cls: `${BEM.BLOCK.COLUMN}__input`
+      cls: `${BEM.ORGS.COLUMN}__input`
     });
 
     // Prevents drag and drop payload from pasting into the input

@@ -1,3 +1,4 @@
+// CardModal.ts
 import { Modal, App, MarkdownRenderer, Component } from "obsidian";
 import { Card } from "types/interfaces";
 import PersonalKanbanPlugin from "main";

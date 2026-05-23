@@ -1,3 +1,4 @@
+// main.scss
 // Base
 @use '_constants/variables';
 
@@ -5,6 +6,7 @@
 @use 'atoms/buttons';
 
 // Molecules
+@use 'molecules/board-item-list';
 @use 'molecules/card';
 
 // Organisms

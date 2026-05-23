@@ -1,3 +1,4 @@
+// KanbanView.ts
 import PersonalKanbanPlugin from "main";
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import { BEM, PERSONAL_KANBAN_VIEW_TYPE } from "utils/constants";
@@ -37,15 +38,15 @@ export default class KanbanView extends ItemView {
     container.empty();
 
     // Main layout wrapper
-    const wrapper = container.createEl("div", { cls: BEM.BLOCK.KANBAN });
+    const wrapper = container.createEl("div", { cls: BEM.PAGS.KANBAN });
 
     // 1. Sidebar Component
-    const sidebarContainer = wrapper.createEl("div", { cls: BEM.BLOCK.SIDEBAR });
+    const sidebarContainer = wrapper.createEl("div", { cls: BEM.ORGS.SIDEBAR });
     const sidebarController = new SidebarController(sidebarContainer, this.plugin, this);
     sidebarController.render();
 
     // 2. Main Board Component
-    const mainContainer = wrapper.createEl("div", { cls: BEM.BLOCK.VIEW });
+    const mainContainer = wrapper.createEl("div", { cls: BEM.TEMPS.VIEW });
     const boardController = new BoardController(mainContainer, this.plugin, this);
     boardController.render();
   }

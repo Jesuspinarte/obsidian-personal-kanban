@@ -1,3 +1,4 @@
+// SidebarController.ts
 import PersonalKanbanPlugin from "main";
 import { Board } from "types/interfaces";
 import { BEM } from "utils/constants";
@@ -16,7 +17,7 @@ export default class SidebarController {
 
   public render() {
     this.renderSettingsToggle();
-    this.container.createEl("h3", { text: "Kanban Boards", cls: `${BEM.BLOCK.SIDEBAR}__title` });
+    this.container.createEl("h3", { text: "Kanban Boards", cls: `${BEM.ORGS.SIDEBAR}__title` });
     this.renderBoardInput();
     this.renderBoardList();
   }

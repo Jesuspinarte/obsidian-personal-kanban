@@ -1,3 +1,4 @@
+// BoardController.ts
 import PersonalKanbanPlugin from "main";
 import { Board, Column } from "types/interfaces";
 import { BEM } from "utils/constants";
@@ -28,13 +29,13 @@ export default class BoardController {
   }
 
   private renderBoardHeader(board: Board) {
-    const header = this.container.createEl("div", { cls: `${BEM.BLOCK.VIEW}__header` });
-    const leftGroup = header.createEl("div", { cls: `${BEM.BLOCK.VIEW}__header-left` });
+    const header = this.container.createEl("div", { cls: `${BEM.TEMPS.VIEW}__header` });
+    const leftGroup = header.createEl("div", { cls: `${BEM.TEMPS.VIEW}__header-left` });
 
     const toggleBtn = leftGroup.createEl("button", { text: "☰", cls: "a-btn--icon" });
     toggleBtn.onclick = () => {
-      const sidebar = this.parentView.containerEl.querySelector(`.${BEM.BLOCK.SIDEBAR}`);
-      if (sidebar) sidebar.classList.toggle(`${BEM.BLOCK.SIDEBAR}--collapsed`);
+      const sidebar = this.parentView.containerEl.querySelector(`.${BEM.ORGS.SIDEBAR}`);
+      if (sidebar) sidebar.classList.toggle(`${BEM.ORGS.SIDEBAR}--collapsed`);
     };
 
     const titleEl = header.createEl("h2", { text: board.title });
@@ -63,7 +64,7 @@ export default class BoardController {
   }
 
   private renderColumns(board: Board) {
-    const boardContainer = this.container.createEl("div", { cls: `${BEM.BLOCK.VIEW}__container` });
+    const boardContainer = this.container.createEl("div", { cls: `${BEM.TEMPS.VIEW}__container` });
 
     if (board.columns.length === 0) {
       board.columns.push({
@@ -118,11 +119,11 @@ export default class BoardController {
       }
     });
 
-    const ghostCol = boardContainer.createEl("div", { cls: `${BEM.BLOCK.COLUMN} is-ghost` });
+    const ghostCol = boardContainer.createEl("div", { cls: `${BEM.ORGS.COLUMN} is-ghost` });
     const ghostInput = ghostCol.createEl("input", {
       type: "text",
       placeholder: "Type to add a new column...",
-      cls: `${BEM.BLOCK.COLUMN}__input`
+      cls: `${BEM.ORGS.COLUMN}__input`
     });
 
     // Prevents drag and drop payload from pasting into the input

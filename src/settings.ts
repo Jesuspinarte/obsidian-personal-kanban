@@ -1,3 +1,4 @@
+// settings.ts
 import {App, PluginSettingTab, Setting} from "obsidian";
 import PersonalKanbanPlugin from "./main";
 

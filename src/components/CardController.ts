@@ -1,3 +1,4 @@
+// CardController.ts
 import { Column, Card } from "types/interfaces";
 import PersonalKanbanPlugin from "main";
 import KanbanView from "views/KanbanView";
@@ -20,7 +21,7 @@ export default class CardController {
   }
 
   public render() {
-    const cardEl = this.container.createEl("div", { cls: BEM.BLOCK.CARD });
+    const cardEl = this.container.createEl("div", { cls: BEM.MOLS.CARD });
 
     cardEl.setAttribute("draggable", "true");
     cardEl.setAttribute("data-card-id", this.card.id);
@@ -41,8 +42,8 @@ export default class CardController {
       cardEl.classList.remove("is-dragging");
     });
 
-    const cardHeader = cardEl.createEl("div", { cls: `${BEM.BLOCK.CARD}__header` });
-    const cardTitle = cardHeader.createEl("h4", { text: this.card.title, cls: `${BEM.BLOCK.CARD}__title` });
+    const cardHeader = cardEl.createEl("div", { cls: `${BEM.MOLS.CARD}__header` });
+    const cardTitle = cardHeader.createEl("h4", { text: this.card.title, cls: `${BEM.MOLS.CARD}__title` });
 
     cardTitle.onclick = (e) => {
       if ((e.target as HTMLElement).tagName === "BUTTON") return;
@@ -57,9 +58,9 @@ export default class CardController {
     };
 
     if (this.card.tags && this.card.tags.length > 0) {
-      const tagsContainer = cardEl.createEl("div", { cls: `${BEM.BLOCK.CARD}__tags` });
+      const tagsContainer = cardEl.createEl("div", { cls: `${BEM.MOLS.CARD}__tags` });
       this.card.tags.forEach(tag => {
-        tagsContainer.createEl("span", { text: tag, cls: `${BEM.BLOCK.CARD}__tag` });
+        tagsContainer.createEl("span", { text: tag, cls: `${BEM.MOLS.CARD}__tag` });
       });
     }
   }

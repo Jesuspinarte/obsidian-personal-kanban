@@ -1,3 +1,4 @@
+// main.ts
 import { DEFAULT_DATA } from 'data/data';
 import { Plugin, WorkspaceLeaf } from 'obsidian';
 import { PluginData } from 'types/interfaces';

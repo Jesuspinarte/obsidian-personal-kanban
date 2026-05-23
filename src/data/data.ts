@@ -1,3 +1,4 @@
+// data.ts
 import { PluginData } from "types/interfaces";
 
 export const DEFAULT_DATA: PluginData = {
