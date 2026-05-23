@@ -25,10 +25,8 @@ export default class CardController {
     cardEl.setAttribute("draggable", "true");
     cardEl.setAttribute("data-card-id", this.card.id);
 
-    // --- DRAG START ---
     cardEl.addEventListener("dragstart", (e) => {
-      e.stopPropagation(); // CRITICAL: Prevents the column from catching this drag event
-
+      e.stopPropagation();
       cardEl.classList.add("is-dragging");
 
       e.dataTransfer?.setData("text/plain", JSON.stringify({
@@ -36,21 +34,16 @@ export default class CardController {
         cardId: this.card.id,
         fromColId: this.column.id
       }));
-
-      // Custom signature so the column knows we are dragging a CARD, not a COLUMN
       e.dataTransfer?.setData("application/x-kanban-card", "true");
     });
 
-    // --- DRAG END ---
     cardEl.addEventListener("dragend", () => {
       cardEl.classList.remove("is-dragging");
     });
 
-    // --- UI RENDERING ---
     const cardHeader = cardEl.createEl("div", { cls: `${BEM.BLOCK.CARD}__header` });
     const cardTitle = cardHeader.createEl("h4", { text: this.card.title, cls: `${BEM.BLOCK.CARD}__title` });
 
-    cardTitle.style.cursor = "pointer";
     cardTitle.onclick = (e) => {
       if ((e.target as HTMLElement).tagName === "BUTTON") return;
       new CardModal(this.plugin.app, this.card, this.plugin, this.parentView).open();

@@ -78,6 +78,38 @@
     color: var(--text-faint);
     font-style: italic;
   }
+
+  /* Layout classes that were in JS */
+  &__move-section {
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid var(--background-modifier-border);
+  }
+
+  &__controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  &__dropdown {
+    /* Obsidian native dropdown styling enhancement */
+    background-color: var(--background-modifier-form-field);
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-normal);
+    padding: 5px 10px;
+    border-radius: 4px;
+
+    &.is-hidden {
+      display: none;
+    }
+  }
+
+  &__btn {
+    &.is-hidden {
+      display: none;
+    }
+  }
 }
 
 .margin-bottom-md {

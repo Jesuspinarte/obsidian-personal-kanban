@@ -1,8 +1,8 @@
-// src/modals/CardModal.ts
 import { Modal, App, MarkdownRenderer, Component } from "obsidian";
 import { Card } from "types/interfaces";
 import PersonalKanbanPlugin from "main";
 import KanbanView from "views/KanbanView";
+import CardTransferController from "components/CardTransferController";
 
 import { EditorView, keymap } from "@codemirror/view";
 import { EditorState, EditorSelection } from "@codemirror/state";
@@ -14,14 +14,12 @@ export default class CardModal extends Modal {
   private plugin: PersonalKanbanPlugin;
   private parentView: KanbanView;
 
-  // UI Elements
   private editor: EditorView | null = null;
   private previewContainer: HTMLElement;
   private editorContainer: HTMLElement;
   private writeTab: HTMLElement;
   private previewTab: HTMLElement;
 
-  // State
   private currentMode: 'preview' | 'write' = 'preview';
 
   constructor(app: App, card: Card, plugin: PersonalKanbanPlugin, parentView: KanbanView) {
@@ -35,11 +33,9 @@ export default class CardModal extends Modal {
     const { contentEl } = this;
     contentEl.empty();
 
-    this.modalEl.style.width = "60vw";
-    this.modalEl.style.maxWidth = "800px";
+    // Using Obsidian's native classes for modals instead of inline styles
     contentEl.addClass("o-card-modal");
 
-    // --- TITLE ---
     const titleEl = contentEl.createEl("h2", { text: this.card.title, cls: "o-card-modal__title" });
     titleEl.setAttribute("contenteditable", "true");
     titleEl.addEventListener("blur", () => {
@@ -51,7 +47,6 @@ export default class CardModal extends Modal {
       if (e.key === "Enter") { e.preventDefault(); titleEl.blur(); }
     });
 
-    // --- TAGS ---
     const tagsSection = contentEl.createEl("div", { cls: "margin-bottom-md" });
     const tagsInput = tagsSection.createEl("input", { type: "text", cls: "o-card-modal__tags-input" });
     tagsInput.value = this.card.tags ? this.card.tags.join(" ") : "";
@@ -60,46 +55,38 @@ export default class CardModal extends Modal {
       this.card.tags = tagsInput.value.split(" ").filter(t => t.trim() !== "");
     });
 
-    // --- DESCRIPTION SECTION (Tabs like GitHub) ---
     const descSection = contentEl.createEl("div", { cls: "o-card-modal__desc-section" });
 
-    // Tabs Header
     const tabsHeader = descSection.createEl("div", { cls: "o-card-modal__tabs" });
     this.previewTab = tabsHeader.createEl("button", { text: "Preview", cls: "o-card-modal__tab" });
     this.writeTab = tabsHeader.createEl("button", { text: "Write", cls: "o-card-modal__tab" });
 
-    // Containers
     const contentContainer = descSection.createEl("div", { cls: "o-card-modal__content" });
     this.previewContainer = contentContainer.createEl("div", { cls: "o-card-modal__preview" });
     this.editorContainer = contentContainer.createEl("div", { cls: "o-card-modal__editor" });
 
-    // Event Listeners for Tabs
     this.previewTab.onclick = () => this.setMode('preview');
     this.writeTab.onclick = () => this.setMode('write');
-
-    // Clicking the preview area switches to Write mode
     this.previewContainer.onclick = () => this.setMode('write');
 
-    // Initialize the Editor
     this.initEditor();
-
-    // Set initial mode
     this.setMode('preview');
 
-    // --- CLICK OUTSIDE LOGIC ---
-    // Detect clicks anywhere on the modal to switch back to preview
     this.modalEl.addEventListener("mousedown", (e) => {
       if (this.currentMode === "write") {
         const target = e.target as Node;
         const isClickInsideEditor = this.editorContainer.contains(target);
         const isClickOnWriteTab = this.writeTab.contains(target);
 
-        // If user clicks outside the editor and outside the 'Write' tab, switch to preview
         if (!isClickInsideEditor && !isClickOnWriteTab) {
           this.setMode("preview");
         }
       }
     });
+
+    // Delegate the move logic to the new specialized component
+    const moveController = new CardTransferController(this.card, contentEl, this.plugin, this.parentView, () => this.close());
+    moveController.render();
   }
 
   //#region Editor Helpers & Hotkeys
@@ -176,7 +163,6 @@ export default class CardModal extends Modal {
             { key: "Mod-q", run: this.toggleBlockquote },
             { key: "Mod-Shift-x", run: (v) => this.wrapText(v, "~~") },
             { key: "Mod-k", run: this.insertLink },
-            // Escape inside CodeMirror returns to Preview mode
             { key: "Escape", run: () => { this.setMode('preview'); return true; } }
           ]),
           EditorView.theme({
@@ -219,7 +205,7 @@ export default class CardModal extends Modal {
       } else {
         const comp = new Component();
         comp.load();
-        await MarkdownRenderer.render(this.app, this.card.description, this.previewContainer, "", comp);
+        await MarkdownRenderer.renderMarkdown(this.card.description, this.previewContainer, "", comp);
       }
     } else {
       this.previewTab.classList.remove("is-active");
@@ -234,16 +220,11 @@ export default class CardModal extends Modal {
     }
   }
 
-  // --- ESCAPE KEY HACK ---
-  // Overrides Obsidian's native modal close mechanism
   close() {
-    // If we are in write mode, pressing Escape or clicking the dark background returns to preview
     if (this.currentMode === 'write') {
       this.setMode('preview');
       return;
     }
-
-    // Otherwise, close the modal normally
     super.close();
   }
 

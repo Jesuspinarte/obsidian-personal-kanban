@@ -3,6 +3,7 @@ import PersonalKanbanPlugin from "main";
 import KanbanView from "views/KanbanView";
 import { BEM } from "utils/constants";
 import CardController from "./CardController";
+import CardModal from "modals/CardModal";
 
 export default class ColumnController {
   private col: Column;
@@ -10,12 +11,14 @@ export default class ColumnController {
   private plugin: PersonalKanbanPlugin;
   private parentView: KanbanView;
   private columnEl: HTMLElement;
+  private isBacklog: boolean;
 
-  constructor(col: Column, container: HTMLElement, plugin: PersonalKanbanPlugin, parentView: KanbanView) {
+  constructor(col: Column, container: HTMLElement, plugin: PersonalKanbanPlugin, parentView: KanbanView, isBacklog: boolean = false) {
     this.col = col;
     this.container = container;
     this.plugin = plugin;
     this.parentView = parentView;
+    this.isBacklog = isBacklog;
   }
 
   public getColumnElement(): HTMLElement {
@@ -25,13 +28,10 @@ export default class ColumnController {
   public render() {
     this.columnEl = this.container.createEl("div", { cls: BEM.BLOCK.COLUMN });
 
-    // --- CENTRALIZED DRAG & DROP FOR CARDS ---
     this.columnEl.addEventListener("dragover", (e) => {
-      // Only react if what is flying over is a CARD
       if (!e.dataTransfer?.types.includes("application/x-kanban-card")) return;
-
       e.preventDefault();
-      e.stopPropagation(); // Stop bubbling to the board
+      e.stopPropagation();
       this.updateDropIndicator(e.clientY);
     });
 
@@ -40,16 +40,13 @@ export default class ColumnController {
     });
 
     this.columnEl.addEventListener("drop", async (e) => {
-      // Ignore if it's not a CARD
       if (!e.dataTransfer?.types.includes("application/x-kanban-card")) return;
-
       e.preventDefault();
-      e.stopPropagation(); // Stop bubbling to the board
+      e.stopPropagation();
       this.clearAllIndicators();
 
       const dataStr = e.dataTransfer!.getData("text/plain");
       if (!dataStr) return;
-
       const data = JSON.parse(dataStr);
 
       if (data.type === "CARD") {
@@ -61,14 +58,10 @@ export default class ColumnController {
 
         if (fromCol && toCol) {
           const insertIndex = this.getInsertIndex(e.clientY);
-
           const draggedIndex = fromCol.cards.findIndex(c => c.id === data.cardId);
           if (draggedIndex === -1) return;
 
-          // 1. Remove from source array
           const [draggedCard] = fromCol.cards.splice(draggedIndex, 1);
-
-          // 2. Insert into target array at specific position
           toCol.cards.splice(insertIndex, 0, draggedCard);
 
           await this.plugin.saveSettings();
@@ -78,22 +71,20 @@ export default class ColumnController {
     });
 
     this.renderHeader(this.columnEl);
+    this.renderCardCreationInput(this.columnEl); // Replaces renderFooter
     this.renderCards(this.columnEl);
-    this.renderFooter(this.columnEl);
   }
 
   //#region D&D Math & Logic
   private clearAllIndicators() {
     const cards = this.columnEl.querySelectorAll(`.${BEM.BLOCK.CARD}`);
     cards.forEach(card => {
-      (card as HTMLElement).style.borderTop = "";
-      (card as HTMLElement).style.borderBottom = "";
+      card.classList.remove("is-drop-target-top", "is-drop-target-bottom");
     });
   }
 
   private updateDropIndicator(mouseY: number) {
     this.clearAllIndicators();
-
     const cardElements = Array.from(this.columnEl.querySelectorAll(`.${BEM.BLOCK.CARD}:not(.is-dragging)`));
     let closestOffset = Number.NEGATIVE_INFINITY;
     let closestChild: HTMLElement | null = null;
@@ -109,11 +100,11 @@ export default class ColumnController {
     });
 
     if (closestChild) {
-      closestChild.style.borderTop = "2px solid var(--interactive-accent)";
+      closestChild.classList.add("is-drop-target-top");
     } else {
       const lastCard = cardElements[cardElements.length - 1] as HTMLElement;
       if (lastCard) {
-        lastCard.style.borderBottom = "2px solid var(--interactive-accent)";
+        lastCard.classList.add("is-drop-target-bottom");
       }
     }
   }
@@ -139,41 +130,104 @@ export default class ColumnController {
 
   private renderHeader(columnEl: HTMLElement) {
     const headerContainer = columnEl.createEl("div", { cls: `${BEM.BLOCK.COLUMN}__header` });
-
     const titleEl = headerContainer.createEl("h3", { text: this.col.title, cls: `${BEM.BLOCK.COLUMN}__title` });
-    titleEl.setAttribute("contenteditable", "true");
 
-    titleEl.addEventListener("blur", async () => {
-      const newTitle = titleEl.innerText.trim();
-      if (newTitle !== "") {
-        this.col.title = newTitle;
-        await this.plugin.saveSettings();
-        this.parentView.render();
-      } else {
-        titleEl.innerText = this.col.title;
-      }
-    });
+    if (!this.isBacklog) {
+      titleEl.setAttribute("contenteditable", "true");
+      titleEl.addEventListener("blur", async () => {
+        const newTitle = titleEl.innerText.trim();
+        if (newTitle !== "") {
+          this.col.title = newTitle;
+          await this.plugin.saveSettings();
+          this.parentView.render();
+        } else {
+          titleEl.innerText = this.col.title;
+        }
+      });
+      titleEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          titleEl.blur();
+        }
+      });
+    }
 
-    titleEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        titleEl.blur();
-      }
-    });
+    const controls = headerContainer.createEl("div", { style: "display: flex; gap: 5px; align-items: center;" });
 
-    const controls = headerContainer.createEl("div");
-    const deleteBtn = controls.createEl("button", { text: "✕" });
+    if (!this.isBacklog) {
+      // Move Column Dropdown
+      const moveSelect = controls.createEl("select", { cls: "dropdown" });
+      moveSelect.createEl("option", { text: "Move", value: "" });
 
-    deleteBtn.onclick = async () => {
-      if (confirm(`Delete column "${this.col.title}" and all its cards?`)) {
+      this.plugin.data.boards.forEach(b => {
+        if (b.id !== this.parentView.activeBoardId) {
+          moveSelect.createEl("option", { text: b.title, value: b.id });
+        }
+      });
+
+      moveSelect.onchange = async () => {
+        const targetId = moveSelect.value;
+        if (!targetId) return;
+
+        const targetBoard = this.plugin.data.boards.find(b => b.id === targetId);
         const activeBoard = this.plugin.data.boards.find(b => b.id === this.parentView.activeBoardId);
-        if (activeBoard) {
+
+        if (activeBoard && targetBoard) {
           activeBoard.columns = activeBoard.columns.filter(c => c.id !== this.col.id);
+          targetBoard.columns.push(this.col);
           await this.plugin.saveSettings();
           this.parentView.render();
         }
+      };
+
+      // Delete Column Button
+      const deleteBtn = controls.createEl("button", { text: "✕" });
+      deleteBtn.onclick = async () => {
+        if (confirm(`Delete column "${this.col.title}" and all its cards?`)) {
+          const activeBoard = this.plugin.data.boards.find(b => b.id === this.parentView.activeBoardId);
+          if (activeBoard) {
+            activeBoard.columns = activeBoard.columns.filter(c => c.id !== this.col.id);
+            await this.plugin.saveSettings();
+            this.parentView.render();
+          }
+        }
+      };
+    }
+  }
+
+  // Replaces the old renderFooter with a sleek input under the header
+  private renderCardCreationInput(columnEl: HTMLElement) {
+    const inputContainer = columnEl.createEl("div", { cls: `${BEM.BLOCK.COLUMN}__input-container` });
+    const input = inputContainer.createEl("input", {
+      type: "text",
+      placeholder: "Type to add a new task...",
+      cls: `${BEM.BLOCK.COLUMN}__input`
+    });
+
+    input.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const title = input.value.trim();
+        if (title !== "") {
+          const newCard: Card = {
+            id: `card-${Date.now()}`,
+            title: title,
+            description: "",
+            tags: []
+          };
+          this.col.cards.push(newCard);
+          await this.plugin.saveSettings();
+
+          if (this.plugin.data.settings?.openModalOnCreate) {
+            // Need to render the parent view to keep DOM in sync, then open modal
+            this.parentView.render();
+            new CardModal(this.plugin.app, newCard, this.plugin, this.parentView).open();
+          } else {
+            this.parentView.render();
+          }
+        }
       }
-    };
+    });
   }
 
   private renderCards(columnEl: HTMLElement) {
@@ -181,21 +235,5 @@ export default class ColumnController {
       const cardComponent = new CardController(card, this.col, columnEl, this.plugin, this.parentView);
       cardComponent.render();
     });
-  }
-
-  private renderFooter(columnEl: HTMLElement) {
-    const addCardBtn = columnEl.createEl("button", { text: "+ Add Card", cls: `${BEM.BLOCK.COLUMN}__add-btn` });
-
-    addCardBtn.onclick = async () => {
-      this.col.cards.push({
-        id: `card-${Date.now()}`,
-        title: "New Task",
-        description: "",
-        tags: []
-      });
-
-      await this.plugin.saveSettings();
-      this.parentView.render();
-    };
   }
 }

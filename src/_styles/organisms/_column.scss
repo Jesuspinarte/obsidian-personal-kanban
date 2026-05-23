@@ -33,4 +33,24 @@
     width: 100%;
     margin-top: $spacing-sm;
   }
+
+  &__input-container {
+    padding: 0 10px 10px 10px;
+  }
+
+  &__input {
+    width: 100%;
+  }
+
+  &.is-ghost {
+    background-color: transparent;
+    border: 2px dashed var(--background-modifier-border);
+    display: flex;
+    align-items: flex-start;
+    padding: 10px;
+
+    .o-kanban-column__input {
+      background-color: var(--background-primary);
+    }
+  }
 }

@@ -38,4 +38,18 @@
     color: $text-on-accent;
     border-radius: 4px;
   }
+
+  /* Drag & Drop States */
+  &.is-dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+
+  &.is-drop-target-top {
+    border-top: 2px solid var(--interactive-accent);
+  }
+
+  &.is-drop-target-bottom {
+    border-bottom: 2px solid var(--interactive-accent);
+  }
 }

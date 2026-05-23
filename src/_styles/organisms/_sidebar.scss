@@ -26,6 +26,14 @@
       background-color: $accent-color !important;
       color: $text-on-accent !important;
     }
+
+    &.is-dragging {
+      opacity: 0.5;
+    }
+
+    &.is-drop-target-top {
+      border-top: 2px solid var(--interactive-accent);
+    }
   }
 
   &__add-btn {
@@ -40,11 +48,27 @@
     border-right: none;
 
     /* Hides sidebar */
-    .o-kanban-sidebar__title,
-    .o-kanban-sidebar__btn,
-    .o-kanban-sidebar__add-btn {
+    &__title,
+    &__btn,
+    &__add-btn {
       opacity: 0;
       pointer-events: none;
     }
+  }
+}
+
+.b-sidebar {
+  &__toggle-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--size-4-3);
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+  }
+
+  &__input {
+    width: 100%;
+    margin-bottom: var(--size-4-3);
   }
 }

@@ -1,5 +1,5 @@
 import PersonalKanbanPlugin from "main";
-import { Board, Column } from "types/interfaces";
+import { Board } from "types/interfaces";
 import { BEM } from "utils/constants";
 import KanbanView from "views/KanbanView";
 import ColumnController from "components/ColumnController";
@@ -51,6 +51,13 @@ export default class BoardController {
       }
     });
 
+    titleEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        titleEl.blur();
+      }
+    });
+
     const controls = header.createEl("div");
     const deleteBtn = controls.createEl("button", { text: "Delete Board" });
     deleteBtn.onclick = async () => {
@@ -66,57 +73,88 @@ export default class BoardController {
   private renderColumns(board: Board) {
     const boardContainer = this.container.createEl("div", { cls: `${BEM.BLOCK.VIEW}__container` });
 
+    // Ensure Backlog column always exists at index 0
+    if (!board.columns.length || board.columns[0].title !== "Backlog") {
+      const existingBacklogIndex = board.columns.findIndex(c => c.title === "Backlog");
+
+      if (existingBacklogIndex > -1) {
+        const [backlog] = board.columns.splice(existingBacklogIndex, 1);
+        board.columns.unshift(backlog);
+      } else {
+        board.columns.unshift({
+          id: `col-backlog-${Date.now()}`,
+          title: "Backlog",
+          cards: []
+        });
+      }
+      this.plugin.saveSettings();
+    }
+
     board.columns.forEach((col, index) => {
-      const columnComponent = new ColumnController(col, boardContainer, this.plugin, this.parentView);
+      const isBacklog = index === 0 && col.title === "Backlog";
+      const columnComponent = new ColumnController(col, boardContainer, this.plugin, this.parentView, isBacklog);
       columnComponent.render();
 
       const colEl = columnComponent.getColumnElement();
-      colEl.setAttribute("draggable", "true");
 
-      // --- DRAG START: Sign this drag as a COLUMN ---
-      colEl.addEventListener("dragstart", (e) => {
-        e.stopPropagation();
-        e.dataTransfer!.setData("text/plain", JSON.stringify({ type: "COLUMN", index }));
-        e.dataTransfer!.setData("application/x-kanban-column", "true");
-      });
+      if (!isBacklog) {
+        colEl.setAttribute("draggable", "true");
 
-      // --- DRAG OVER ---
-      colEl.addEventListener("dragover", (e) => {
-        if (!e.dataTransfer?.types.includes("application/x-kanban-column")) return;
-        e.preventDefault();
-      });
+        colEl.addEventListener("dragstart", (e) => {
+          e.stopPropagation();
+          e.dataTransfer!.setData("text/plain", JSON.stringify({ type: "COLUMN", index }));
+          e.dataTransfer!.setData("application/x-kanban-column", "true");
+        });
 
-      // --- DROP ---
-      colEl.addEventListener("drop", async (e) => {
-        if (!e.dataTransfer?.types.includes("application/x-kanban-column")) return;
-        e.preventDefault();
-        e.stopPropagation();
+        colEl.addEventListener("dragover", (e) => {
+          if (!e.dataTransfer?.types.includes("application/x-kanban-column")) return;
+          e.preventDefault();
+        });
 
-        const data = JSON.parse(e.dataTransfer!.getData("text/plain"));
+        colEl.addEventListener("drop", async (e) => {
+          if (!e.dataTransfer?.types.includes("application/x-kanban-column")) return;
+          e.preventDefault();
+          e.stopPropagation();
 
-        if (data.type === "COLUMN") {
-          const fromIndex = data.index;
-          const toIndex = index;
+          const data = JSON.parse(e.dataTransfer!.getData("text/plain"));
 
-          if (fromIndex !== toIndex) {
-            const [removed] = board.columns.splice(fromIndex, 1);
-            board.columns.splice(toIndex, 0, removed);
-            await this.plugin.saveSettings();
-            this.parentView.render();
+          if (data.type === "COLUMN") {
+            const fromIndex = data.index;
+            const toIndex = index;
+
+            if (fromIndex !== toIndex && fromIndex !== 0 && toIndex !== 0) {
+              const [removed] = board.columns.splice(fromIndex, 1);
+              board.columns.splice(toIndex, 0, removed);
+              await this.plugin.saveSettings();
+              this.parentView.render();
+            }
           }
-        }
-      });
+        });
+      }
     });
 
-    const addColBtn = boardContainer.createEl("button", { text: "+ Add Column" });
-    addColBtn.onclick = async () => {
-      board.columns.push({
-        id: `col-${Date.now()}`,
-        title: "New Column",
-        cards: []
-      });
-      await this.plugin.saveSettings();
-      this.parentView.render();
-    };
+    // Ghost Column for Creating New Columns
+    const ghostCol = boardContainer.createEl("div", { cls: `${BEM.BLOCK.COLUMN} is-ghost` });
+    const ghostInput = ghostCol.createEl("input", {
+      type: "text",
+      placeholder: "Type to add a new column...",
+      cls: `${BEM.BLOCK.COLUMN}__input`
+    });
+
+    ghostInput.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const title = ghostInput.value.trim();
+        if (title !== "") {
+          board.columns.push({
+            id: `col-${Date.now()}`,
+            title: title,
+            cards: []
+          });
+          await this.plugin.saveSettings();
+          this.parentView.render();
+        }
+      }
+    });
   }
 }

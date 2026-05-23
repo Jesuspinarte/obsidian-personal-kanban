@@ -41,6 +41,19 @@ button.a-btn--icon.delete {
   color: var(--text-on-accent);
   border-radius: 4px;
 }
+.m-kanban-card {
+  /* Drag & Drop States */
+}
+.m-kanban-card.is-dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+.m-kanban-card.is-drop-target-top {
+  border-top: 2px solid var(--interactive-accent);
+}
+.m-kanban-card.is-drop-target-bottom {
+  border-bottom: 2px solid var(--interactive-accent);
+}
 
 .o-kanban-column {
   background-color: var(--background-secondary);
@@ -72,6 +85,22 @@ button.a-btn--icon.delete {
   width: 100%;
   margin-top: 10px;
 }
+.o-kanban-column__input-container {
+  padding: 0 10px 10px 10px;
+}
+.o-kanban-column__input {
+  width: 100%;
+}
+.o-kanban-column.is-ghost {
+  background-color: transparent;
+  border: 2px dashed var(--background-modifier-border);
+  display: flex;
+  align-items: flex-start;
+  padding: 10px;
+}
+.o-kanban-column.is-ghost .o-kanban-column__input {
+  background-color: var(--background-primary);
+}
 
 .o-kanban-sidebar {
   width: 250px;
@@ -97,6 +126,12 @@ button.a-btn--icon.delete {
   background-color: var(--interactive-accent) !important;
   color: var(--text-on-accent) !important;
 }
+.o-kanban-sidebar__btn.is-dragging {
+  opacity: 0.5;
+}
+.o-kanban-sidebar__btn.is-drop-target-top {
+  border-top: 2px solid var(--interactive-accent);
+}
 .o-kanban-sidebar__add-btn {
   margin-top: auto;
   transition: opacity 0.2s ease;
@@ -108,11 +143,22 @@ button.a-btn--icon.delete {
   border-right: none;
   /* Hides sidebar */
 }
-.o-kanban-sidebar--collapsed .o-kanban-sidebar__title,
-.o-kanban-sidebar--collapsed .o-kanban-sidebar__btn,
-.o-kanban-sidebar--collapsed .o-kanban-sidebar__add-btn {
+.o-kanban-sidebar--collapsed__title, .o-kanban-sidebar--collapsed__btn, .o-kanban-sidebar--collapsed__add-btn {
   opacity: 0;
   pointer-events: none;
+}
+
+.b-sidebar__toggle-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--size-4-3);
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+}
+.b-sidebar__input {
+  width: 100%;
+  margin-bottom: var(--size-4-3);
 }
 
 .o-card-modal__title {
@@ -182,6 +228,33 @@ button.a-btn--icon.delete {
 .o-card-modal__placeholder {
   color: var(--text-faint);
   font-style: italic;
+}
+.o-card-modal {
+  /* Layout classes that were in JS */
+}
+.o-card-modal__move-section {
+  margin-top: 30px;
+  padding-top: 15px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+.o-card-modal__controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.o-card-modal__dropdown {
+  /* Obsidian native dropdown styling enhancement */
+  background-color: var(--background-modifier-form-field);
+  border: 1px solid var(--background-modifier-border);
+  color: var(--text-normal);
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+.o-card-modal__dropdown.is-hidden {
+  display: none;
+}
+.o-card-modal__btn.is-hidden {
+  display: none;
 }
 
 .margin-bottom-md {

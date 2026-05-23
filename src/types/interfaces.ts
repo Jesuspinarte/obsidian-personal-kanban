@@ -18,5 +18,8 @@ export interface Board {
 };
 
 export interface PluginData {
-  boards: Board[]
+  boards: Board[];
+  settings?: {
+    openModalOnCreate: boolean;
+  };
 };

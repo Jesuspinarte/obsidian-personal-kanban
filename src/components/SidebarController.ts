@@ -11,47 +11,88 @@ export default class SidebarController {
   constructor(container: HTMLElement, plugin: PersonalKanbanPlugin, parentView: KanbanView) {
     this.container = container;
     this.plugin = plugin;
-    this.parentView = parentView; // We pass the parent to trigger re-renders and access the active state
+    this.parentView = parentView;
   }
 
   public render() {
+    this.renderSettingsToggle();
     this.container.createEl("h3", { text: "Kanban Boards", cls: `${BEM.BLOCK.SIDEBAR}__title` });
+    this.renderBoardInput();
     this.renderBoardList();
-    this.renderAddBoardBtn();
   }
 
-  /**
-   * Renders the kanban boards list
-   */
+  private renderSettingsToggle() {
+    const toggleContainer = this.container.createEl("div", { cls: "b-sidebar__toggle-container" });
+    toggleContainer.createEl("label", { text: "Auto-open card modal" });
+    const toggle = toggleContainer.createEl("input", { type: "checkbox" });
+
+    // Initialize settings if they don't exist
+    if (!this.plugin.data.settings) {
+      this.plugin.data.settings = { openModalOnCreate: false };
+    }
+
+    toggle.checked = this.plugin.data.settings.openModalOnCreate;
+
+    toggle.onchange = async () => {
+      if (this.plugin.data.settings) {
+        this.plugin.data.settings.openModalOnCreate = toggle.checked;
+        await this.plugin.saveSettings();
+      }
+    };
+  }
+
+  private renderBoardInput() {
+    const input = this.container.createEl("input", {
+      type: "text",
+      placeholder: "Type to add board...",
+      cls: "b-sidebar__input"
+    });
+
+    input.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const title = input.value.trim();
+        if (title !== "") {
+          const newBoard: Board = {
+            id: `board-${Date.now()}`,
+            title: title,
+            columns: [{ id: `col-backlog-${Date.now()}`, title: "Backlog", cards: [] }]
+          };
+          this.plugin.data.boards.push(newBoard);
+          this.parentView.activeBoardId = newBoard.id;
+          await this.plugin.saveSettings();
+          this.parentView.render();
+        }
+      }
+    });
+  }
+
   private renderBoardList() {
     this.plugin.data.boards.forEach((board, index) => {
       const btn = this.container.createEl("button", { text: board.title, cls: `${BEM.BLOCK.SIDEBAR}__btn` });
       btn.setAttribute("draggable", "true");
 
-      // 1. Drag Start: Identify which board is being moved
       btn.addEventListener("dragstart", (e) => {
         e.dataTransfer!.setData("text/plain", index.toString());
-        btn.style.opacity = "0.5"; // Visual feedback
+        btn.classList.add("is-dragging");
       });
 
       btn.addEventListener("dragend", () => {
-        btn.style.opacity = "1";
+        btn.classList.remove("is-dragging");
       });
 
-      // 2. Drag Over: Necessary to allow dropping
       btn.addEventListener("dragover", (e) => {
         e.preventDefault();
-        btn.style.borderTop = "2px solid var(--interactive-accent)"; // Visual feedback
+        btn.classList.add("is-drop-target-top");
       });
 
       btn.addEventListener("dragleave", () => {
-        btn.style.borderTop = "";
+        btn.classList.remove("is-drop-target-top");
       });
 
-      // 3. Drop: Perform the reorder
       btn.addEventListener("drop", async (e) => {
         e.preventDefault();
-        btn.style.borderTop = "";
+        btn.classList.remove("is-drop-target-top");
 
         const draggedIndex = parseInt(e.dataTransfer!.getData("text/plain"));
         const targetIndex = index;
@@ -66,7 +107,6 @@ export default class SidebarController {
         }
       });
 
-      // Highlights active board
       if (board.id === this.parentView.activeBoardId) {
         btn.classList.add(`${BEM.BLOCK.SIDEBAR}__btn--active`);
       }
@@ -76,26 +116,5 @@ export default class SidebarController {
         this.parentView.render();
       };
     });
-  }
-
-  /**
-   * Renders the Add Kanban Board button
-   */
-  private renderAddBoardBtn() {
-    const addBoardBtn = this.container.createEl("button", { text: "+ Add Kanban Board", cls: `${BEM.BLOCK.SIDEBAR}__add-btn` });
-
-    addBoardBtn.onclick = async () => {
-      const newBoard: Board = {
-        id: `board-${Date.now()}`,
-        title: `Kanban Board #${this.plugin.data.boards.length + 1}`,
-        columns: [] // Starts empty by default
-      };
-
-      this.plugin.data.boards.push(newBoard);
-      this.parentView.activeBoardId = newBoard.id;
-
-      await this.plugin.saveSettings();
-      this.parentView.render();
-    };
   }
 }
