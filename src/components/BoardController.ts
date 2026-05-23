@@ -1,9 +1,9 @@
-// BoardController.ts
 import PersonalKanbanPlugin from "main";
-import { Board, Column } from "types/interfaces";
+import { Board } from "types/interfaces";
 import { BEM } from "utils/constants";
 import KanbanView from "views/KanbanView";
 import ColumnController from "components/ColumnController";
+import { setIcon } from "obsidian";
 
 export default class BoardController {
   private container: HTMLElement;
@@ -32,16 +32,27 @@ export default class BoardController {
     const header = this.container.createEl("div", { cls: `${BEM.TEMPS.VIEW}__header` });
     const leftGroup = header.createEl("div", { cls: `${BEM.TEMPS.VIEW}__header-left` });
 
-    const toggleBtn = leftGroup.createEl("button", { text: "☰", cls: "a-btn--icon" });
+    // Collapsible sidebar button using native chevron icon
+    const toggleBtn = leftGroup.createEl("button", { cls: "a-btn--icon m-kanban-toggle-sidebar" });
+
+    // Check current state to apply the correct initial icon
+    const sidebar = this.parentView.containerEl.querySelector(`.${BEM.ORGS.SIDEBAR}`);
+    const isCurrentlyCollapsed = sidebar?.classList.contains(`${BEM.ORGS.SIDEBAR}--collapsed`);
+    setIcon(toggleBtn, isCurrentlyCollapsed ? "chevron-right" : "chevron-left");
+
     toggleBtn.onclick = () => {
-      const sidebar = this.parentView.containerEl.querySelector(`.${BEM.ORGS.SIDEBAR}`);
-      if (sidebar) sidebar.classList.toggle(`${BEM.ORGS.SIDEBAR}--collapsed`);
+      const currentSidebar = this.parentView.containerEl.querySelector(`.${BEM.ORGS.SIDEBAR}`);
+      if (currentSidebar) {
+        const isCollapsed = currentSidebar.classList.toggle(`${BEM.ORGS.SIDEBAR}--collapsed`);
+        // Smoothly animate the chevron switch native to Obsidian
+        setIcon(toggleBtn, isCollapsed ? "chevron-right" : "chevron-left");
+      }
     };
 
-    const titleEl = header.createEl("h2", { text: board.title });
+    // Board title justified left
+    const titleEl = leftGroup.createEl("h2", { text: board.title });
     titleEl.setAttribute("contenteditable", "true");
 
-    // Prevents drag and drop payload from pasting into the title
     titleEl.addEventListener("drop", (e) => e.preventDefault());
 
     titleEl.addEventListener("blur", async () => {
@@ -126,7 +137,6 @@ export default class BoardController {
       cls: `${BEM.ORGS.COLUMN}__input`
     });
 
-    // Prevents drag and drop payload from pasting into the input
     ghostInput.addEventListener("drop", (e) => e.preventDefault());
 
     ghostInput.addEventListener("keydown", async (e) => {

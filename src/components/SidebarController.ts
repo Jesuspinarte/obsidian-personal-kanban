@@ -1,8 +1,8 @@
-// SidebarController.ts
 import PersonalKanbanPlugin from "main";
 import { Board } from "types/interfaces";
 import { BEM } from "utils/constants";
 import KanbanView from "views/KanbanView";
+import { setIcon } from "obsidian";
 
 export default class SidebarController {
   private container: HTMLElement;
@@ -23,7 +23,7 @@ export default class SidebarController {
   }
 
   private renderSettingsToggle() {
-    const toggleContainer = this.container.createEl("div", { cls: ".m-board-item-list__toggle-container" });
+    const toggleContainer = this.container.createEl("div", { cls: "m-board-item-list__toggle-container" });
     toggleContainer.createEl("label", { text: "Auto-open card modal" });
     const toggle = toggleContainer.createEl("input", { type: "checkbox" });
 
@@ -45,10 +45,9 @@ export default class SidebarController {
     const input = this.container.createEl("input", {
       type: "text",
       placeholder: "Type to add board...",
-      cls: ".m-board-item-list__input"
+      cls: "m-board-item-list__input"
     });
 
-    // Prevents drag and drop payload from pasting into the input
     input.addEventListener("drop", (e) => e.preventDefault());
 
     input.addEventListener("keydown", async (e) => {
@@ -72,11 +71,15 @@ export default class SidebarController {
 
   private renderBoardList() {
     this.plugin.data.boards.forEach((board, index) => {
-      const itemEl = this.container.createEl("div", { cls: ".m-board-item-list__item" });
+      const itemEl = this.container.createEl("div", { cls: "m-board-item-list__item" });
       itemEl.setAttribute("draggable", "true");
 
-      const titleEl = itemEl.createEl("span", { text: board.title, cls: ".m-board-item-list__item-title" });
-      const deleteBtn = itemEl.createEl("button", { text: "✕", cls: ".m-board-item-list__delete-btn" });
+      // Board Title aligned to the left
+      const titleEl = itemEl.createEl("span", { text: board.title, cls: "m-board-item-list__item-title" });
+
+      // Delete Button with Obsidian native Trash icon aligned to the right
+      const deleteBtn = itemEl.createEl("button", { cls: "m-board-item-list__delete-btn" });
+      setIcon(deleteBtn, "trash-2");
 
       deleteBtn.onclick = async (e) => {
         e.stopPropagation();
@@ -98,7 +101,7 @@ export default class SidebarController {
       };
 
       if (board.id === this.parentView.activeBoardId) {
-        itemEl.classList.add(".m-board-item-list__item--active");
+        itemEl.classList.add("m-board-item-list__item--active");
       }
 
       itemEl.addEventListener("dragstart", (e) => {

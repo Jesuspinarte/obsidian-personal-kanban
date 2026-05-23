@@ -1,26 +1,30 @@
-// _column.scss
 @use '../_constants/variables' as *;
 
 .o-kanban-column {
   background-color: $bg-secondary;
+  border: 1px solid $border-color;
   min-width: 300px;
   width: 300px;
-  flex-shrink: 0; // Prevents the column from shrinking when there are many
+  flex-shrink: 0;
   border-radius: $radius-md;
-  padding: $spacing-md;
+  padding: 14px 12px;
   display: flex;
   flex-direction: column;
-  gap: $spacing-sm;
-  cursor: grab;
-
-  &:active {
-    cursor: grabbing;
-  }
+  gap: 8px;
+  box-shadow: $shadow-sm;
+  transition: $transition-smooth;
 
   &__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0 4px 6px 4px;
+
+    &:hover {
+      .o-kanban-column__delete-btn {
+        opacity: 0.6;
+      }
+    }
   }
 
   &__title {
@@ -28,30 +32,74 @@
     outline: none;
     cursor: text;
     flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-normal);
   }
 
-  &__add-btn {
-    width: 100%;
-    margin-top: $spacing-sm;
+  // --- Trash Button Style ---
+  &__delete-btn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 4px !important;
+    border-radius: 4px;
+    height: auto !important;
+    color: $text-muted;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    margin-left: 5px;
+
+    &:hover {
+      background-color: var(--text-error) !important;
+      color: white !important;
+      opacity: 1 !important;
+
+      svg {
+        stroke: white !important;
+        color: white !important;
+      }
+    }
   }
 
   &__input-container {
-    padding: 0 10px 10px 10px;
+    padding: 0 2px 6px 2px;
   }
 
   &__input {
     width: 100%;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: $radius-sm;
+    padding: 6px 10px;
+    font-size: 13px;
+    transition: $transition-smooth;
+
+    &:hover {
+      background-color: var(--background-modifier-hover);
+    }
+
+    &:focus {
+      background-color: $bg-primary;
+      border-color: $accent-color;
+      box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.15);
+    }
   }
 
   &.is-ghost {
     background-color: transparent;
-    border: 2px dashed var(--background-modifier-border);
-    display: flex;
-    align-items: flex-start;
-    padding: 10px;
+    border: 2px dashed $border-color;
+    box-shadow: none;
 
     .o-kanban-column__input {
-      background-color: var(--background-primary);
+      background-color: transparent;
+
+      &:focus {
+        background-color: $bg-primary;
+      }
     }
   }
 }

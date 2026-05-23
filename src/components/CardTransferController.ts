@@ -1,4 +1,3 @@
-// CardTransferController.ts
 import { Card } from "types/interfaces";
 import PersonalKanbanPlugin from "main";
 import KanbanView from "views/KanbanView";
@@ -15,12 +14,12 @@ export default class CardTransferController {
     this.container = container;
     this.plugin = plugin;
     this.parentView = parentView;
-    this.onTransferComplete = onTransferComplete; // Callback to close the modal
+    this.onTransferComplete = onTransferComplete;
   }
 
   public render() {
     const moveSection = this.container.createEl("div", { cls: "o-card-modal__move-section" });
-    moveSection.createEl("h4", { text: "Send to another Board", cls: "margin-bottom-sm" });
+    moveSection.createEl("h4", { text: "Send to another Board" });
 
     const controlsDiv = moveSection.createEl("div", { cls: "o-card-modal__controls" });
 

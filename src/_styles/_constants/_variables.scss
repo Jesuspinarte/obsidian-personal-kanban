@@ -1,13 +1,20 @@
-// _variables.scss
-// Obsidian variables for light/dark themes
 $bg-primary: var(--background-primary);
 $bg-secondary: var(--background-secondary);
+$bg-secondary-alt: var(--background-secondary-alt);
 $border-color: var(--background-modifier-border);
 $accent-color: var(--interactive-accent);
 $text-on-accent: var(--text-on-accent);
+$text-muted: var(--text-muted);
 
 $radius-sm: 6px;
-$radius-md: 8px;
+$radius-md: 10px;
 $spacing-sm: 10px;
 $spacing-md: 15px;
 $spacing-lg: 20px;
+
+// Dribbble-like smooth drop shadows
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.08);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.03);
+$shadow-hover: 0 10px 15px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.02);
+
+$transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);

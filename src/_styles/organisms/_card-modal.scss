@@ -1,20 +1,73 @@
-// _card-modal.scss
 @use '../_constants/variables' as *;
 
 .o-card-modal {
-  &__title {
-    outline: none;
-    border-bottom: 1px solid $border-color;
-    padding-bottom: $spacing-sm;
+
+  /* Header Area */
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: $spacing-lg;
-    cursor: text;
+    gap: 15px;
   }
 
+  &__title {
+    margin: 0;
+    outline: none;
+    flex: 1;
+    cursor: text;
+    font-weight: 600;
+  }
+
+  &__delete-btn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 6px !important;
+    border-radius: 4px;
+    color: $text-muted;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: var(--text-error) !important;
+      color: white !important;
+
+      svg {
+        stroke: white !important;
+        color: white !important;
+      }
+    }
+  }
+
+  /* --- 70/30 Trello Layout --- */
+  &__layout {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+  }
+
+  &__main {
+    flex: 0 0 65%;
+    width: 65%;
+  }
+
+  &__sidebar {
+    flex: 0 0 calc(35% - 30px);
+    width: calc(35% - 30px);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* Main Area Elements */
   &__tags-input {
     width: 100%;
+    margin-bottom: $spacing-md;
   }
 
-  /* --- Tabs System (GitHub Style) --- */
   &__desc-section {
     display: flex;
     flex-direction: column;
@@ -22,9 +75,8 @@
 
   &__tabs {
     display: flex;
-    gap: 5px;
+    gap: 4px;
     margin-bottom: -1px;
-    /* Pulls the content box up to overlap borders */
     z-index: 1;
   }
 
@@ -32,12 +84,13 @@
     background: transparent;
     border: 1px solid transparent;
     border-bottom: none;
-    padding: 8px 16px;
+    padding: 6px 14px;
     cursor: pointer;
-    border-radius: 6px 6px 0 0;
-    color: var(--text-muted);
-    font-size: 14px;
+    border-radius: 4px 4px 0 0;
+    color: $text-muted;
+    font-size: 13px;
     box-shadow: none;
+    transition: $transition-smooth;
 
     &:hover {
       color: var(--text-normal);
@@ -47,7 +100,7 @@
       background-color: $bg-primary;
       border-color: $border-color;
       color: var(--text-normal);
-      font-weight: bold;
+      font-weight: 500;
     }
   }
 
@@ -56,16 +109,16 @@
     border-radius: 0 6px 6px 6px;
     background-color: $bg-primary;
     overflow: hidden;
+    box-shadow: $shadow-sm;
   }
 
   &__preview {
-    min-height: 200px;
-    padding: 15px;
+    min-height: 150px;
+    padding: 14px;
     cursor: pointer;
-    /* Indicates it can be clicked to edit */
     user-select: text;
+    font-size: 14px;
 
-    /* Styling Obsidian's markdown injection */
     p:first-child {
       margin-top: 0;
     }
@@ -80,26 +133,33 @@
     font-style: italic;
   }
 
-  /* Layout classes that were in JS */
+  /* Sidebar Area Elements */
   &__move-section {
-    margin-top: 30px;
-    padding-top: 15px;
-    border-top: 1px solid var(--background-modifier-border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    h4 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
   }
 
   &__controls {
     display: flex;
-    gap: 10px;
-    align-items: center;
+    flex-direction: column; // Stack elements vertically in sidebar
+    gap: 8px;
   }
 
   &__dropdown {
-    /* Obsidian native dropdown styling enhancement */
+    width: 100%; // Fill sidebar
     background-color: var(--background-modifier-form-field);
-    border: 1px solid var(--background-modifier-border);
+    border: 1px solid $border-color;
     color: var(--text-normal);
-    padding: 5px 10px;
+    padding: 6px 10px;
     border-radius: 4px;
+    font-size: 13px;
 
     &.is-hidden {
       display: none;
@@ -107,12 +167,88 @@
   }
 
   &__btn {
+    width: 100%; // Fill sidebar
+    font-size: 13px;
+    padding: 6px 0;
+
     &.is-hidden {
       display: none;
     }
   }
-}
 
-.margin-bottom-md {
-  margin-bottom: $spacing-md;
+  &__comments-section {
+    display: flex;
+    flex-direction: column;
+
+    h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 10px 0;
+    }
+  }
+
+  &__comment-box {
+    display: flex;
+    flex-direction: column; // Stack avatar and input for narrow spaces
+    gap: 8px;
+  }
+
+  &__avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: $accent-color;
+    color: $text-on-accent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  &__comment-input-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background-color: $bg-secondary;
+    border: 1px solid $border-color;
+    border-radius: 6px;
+    padding: 8px 12px;
+    transition: $transition-smooth;
+
+    &:focus-within {
+      background-color: $bg-primary;
+      border-color: $accent-color;
+      box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.15);
+    }
+
+    textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      resize: vertical;
+      min-height: 60px;
+      padding: 0;
+      font-size: 13px;
+      color: var(--text-normal);
+
+      &:focus {
+        box-shadow: none;
+      }
+    }
+  }
+
+  &__comment-actions {
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+      font-size: 12px;
+      padding: 4px 12px;
+      height: auto;
+    }
+  }
 }

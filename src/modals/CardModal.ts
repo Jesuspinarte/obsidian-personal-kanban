@@ -1,6 +1,5 @@
-// CardModal.ts
-import { Modal, App, MarkdownRenderer, Component } from "obsidian";
-import { Card } from "types/interfaces";
+import { Modal, App, MarkdownRenderer, Component, setIcon } from "obsidian";
+import { Card, Column } from "types/interfaces";
 import PersonalKanbanPlugin from "main";
 import KanbanView from "views/KanbanView";
 import CardTransferController from "components/CardTransferController";
@@ -12,6 +11,7 @@ import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 
 export default class CardModal extends Modal {
   private card: Card;
+  private column: Column;
   private plugin: PersonalKanbanPlugin;
   private parentView: KanbanView;
 
@@ -23,9 +23,10 @@ export default class CardModal extends Modal {
 
   private currentMode: 'preview' | 'write' = 'preview';
 
-  constructor(app: App, card: Card, plugin: PersonalKanbanPlugin, parentView: KanbanView) {
+  constructor(app: App, card: Card, column: Column, plugin: PersonalKanbanPlugin, parentView: KanbanView) {
     super(app);
     this.card = card;
+    this.column = column;
     this.plugin = plugin;
     this.parentView = parentView;
   }
@@ -33,11 +34,16 @@ export default class CardModal extends Modal {
   onOpen() {
     const { contentEl } = this;
     contentEl.empty();
-
-    // Using Obsidian's native classes for modals instead of inline styles
     contentEl.addClass("o-card-modal");
 
-    const titleEl = contentEl.createEl("h2", { text: this.card.title, cls: "o-card-modal__title" });
+    // Make modal wider to accommodate the 70/30 layout comfortably
+    this.modalEl.style.width = "75vw";
+    this.modalEl.style.maxWidth = "900px";
+
+    // --- HEADER ---
+    const headerEl = contentEl.createEl("div", { cls: "o-card-modal__header" });
+    const titleEl = headerEl.createEl("h2", { text: this.card.title, cls: "o-card-modal__title" });
+
     titleEl.setAttribute("contenteditable", "true");
     titleEl.addEventListener("blur", () => {
       const newTitle = titleEl.innerText.trim();
@@ -48,16 +54,32 @@ export default class CardModal extends Modal {
       if (e.key === "Enter") { e.preventDefault(); titleEl.blur(); }
     });
 
-    const tagsSection = contentEl.createEl("div", { cls: "margin-bottom-md" });
-    const tagsInput = tagsSection.createEl("input", { type: "text", cls: "o-card-modal__tags-input" });
+    const deleteBtn = headerEl.createEl("button", { cls: "o-card-modal__delete-btn" });
+    setIcon(deleteBtn, "trash-2");
+
+    deleteBtn.onclick = async () => {
+      if (confirm(`Delete "${this.card.title}"?`)) {
+        this.column.cards = this.column.cards.filter(c => c.id !== this.card.id);
+        await this.plugin.saveSettings();
+        this.parentView.render();
+        this.close();
+      }
+    };
+
+    // --- TRELLO LAYOUT (70/30) ---
+    const layoutEl = contentEl.createEl("div", { cls: "o-card-modal__layout" });
+    const mainEl = layoutEl.createEl("div", { cls: "o-card-modal__main" });
+    const sidebarEl = layoutEl.createEl("div", { cls: "o-card-modal__sidebar" });
+
+    // --- MAIN SECTION (70%) ---
+    const tagsInput = mainEl.createEl("input", { type: "text", cls: "o-card-modal__tags-input" });
     tagsInput.value = this.card.tags ? this.card.tags.join(" ") : "";
     tagsInput.placeholder = "Tags: #urgent #frontend (Separate by spaces)";
     tagsInput.addEventListener("blur", () => {
       this.card.tags = tagsInput.value.split(" ").filter(t => t.trim() !== "");
     });
 
-    const descSection = contentEl.createEl("div", { cls: "o-card-modal__desc-section" });
-
+    const descSection = mainEl.createEl("div", { cls: "o-card-modal__desc-section" });
     const tabsHeader = descSection.createEl("div", { cls: "o-card-modal__tabs" });
     this.previewTab = tabsHeader.createEl("button", { text: "Preview", cls: "o-card-modal__tab" });
     this.writeTab = tabsHeader.createEl("button", { text: "Write", cls: "o-card-modal__tab" });
@@ -85,9 +107,27 @@ export default class CardModal extends Modal {
       }
     });
 
-    // Delegate the move logic to the new specialized component
-    const moveController = new CardTransferController(this.card, contentEl, this.plugin, this.parentView, () => this.close());
+    // --- SIDEBAR SECTION (30%) ---
+    const moveController = new CardTransferController(this.card, sidebarEl, this.plugin, this.parentView, () => this.close());
     moveController.render();
+
+    this.renderCommentsUI(sidebarEl);
+  }
+
+  private renderCommentsUI(sidebarEl: HTMLElement) {
+    const commentsSection = sidebarEl.createEl("div", { cls: "o-card-modal__comments-section" });
+    commentsSection.createEl("h3", { text: "Comments" });
+
+    const commentBox = commentsSection.createEl("div", { cls: "o-card-modal__comment-box" });
+    commentBox.createEl("div", { text: "ME", cls: "o-card-modal__avatar" });
+
+    const inputWrapper = commentBox.createEl("div", { cls: "o-card-modal__comment-input-wrapper" });
+    const textarea = inputWrapper.createEl("textarea", { placeholder: "Write a comment..." });
+
+    const actions = inputWrapper.createEl("div", { cls: "o-card-modal__comment-actions" });
+    const saveBtn = actions.createEl("button", { text: "Save", cls: "mod-cta" });
+
+    saveBtn.onclick = () => { textarea.value = ""; };
   }
 
   //#region Editor Helpers & Hotkeys

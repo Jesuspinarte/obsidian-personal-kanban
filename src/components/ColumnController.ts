@@ -1,10 +1,10 @@
-// ColumnController.ts
 import { Card, Column } from "types/interfaces";
 import PersonalKanbanPlugin from "main";
 import KanbanView from "views/KanbanView";
 import { BEM } from "utils/constants";
 import CardController from "./CardController";
 import CardModal from "modals/CardModal";
+import { setIcon } from "obsidian";
 
 export default class ColumnController {
   private col: Column;
@@ -134,8 +134,6 @@ export default class ColumnController {
     const titleEl = headerContainer.createEl("h3", { text: this.col.title, cls: `${BEM.ORGS.COLUMN}__title` });
 
     titleEl.setAttribute("contenteditable", "true");
-
-    // Prevents drag and drop payload from pasting into the title
     titleEl.addEventListener("drop", (e) => e.preventDefault());
 
     titleEl.addEventListener("blur", async () => {
@@ -182,7 +180,9 @@ export default class ColumnController {
         }
       };
 
-      const deleteBtn = controls.createEl("button", { text: "✕" });
+      const deleteBtn = controls.createEl("button", { cls: `${BEM.ORGS.COLUMN}__delete-btn` });
+      setIcon(deleteBtn, "trash-2");
+
       deleteBtn.onclick = async () => {
         if (confirm(`Delete column "${this.col.title}" and all its cards?`)) {
           const activeBoard = this.plugin.data.boards.find(b => b.id === this.parentView.activeBoardId);
@@ -204,7 +204,6 @@ export default class ColumnController {
       cls: `${BEM.ORGS.COLUMN}__input`
     });
 
-    // Prevents drag and drop payload from pasting into the input
     input.addEventListener("drop", (e) => e.preventDefault());
 
     input.addEventListener("keydown", async (e) => {
@@ -223,7 +222,8 @@ export default class ColumnController {
 
           if (this.plugin.data.settings?.openModalOnCreate) {
             this.parentView.render();
-            new CardModal(this.plugin.app, newCard, this.plugin, this.parentView).open();
+            // Pass this.col to the Modal
+            new CardModal(this.plugin.app, newCard, this.col, this.plugin, this.parentView).open();
           } else {
             this.parentView.render();
           }

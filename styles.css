@@ -21,31 +21,43 @@ button.a-btn--icon.delete {
   margin-bottom: var(--size-4-3);
 }
 
-/* New layout for the board item to hold title and delete button */
 .m-board-item-list__item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 5px 10px;
+  padding: 8px 12px;
   cursor: pointer;
   border: 1px solid transparent;
-  border-radius: 4px;
-  margin-bottom: 2px;
+  border-radius: 6px;
+  margin-bottom: 4px;
   background: transparent;
   color: var(--text-normal);
-  text-align: left;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .m-board-item-list__item:hover {
   background-color: var(--background-modifier-hover);
 }
+.m-board-item-list__item:hover .m-board-item-list__delete-btn {
+  opacity: 0.6;
+}
 .m-board-item-list__item--active {
-  background-color: var(--background-modifier-active-hover);
-  font-weight: bold;
-  color: var(--text-accent);
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-weight: 500;
+}
+.m-board-item-list__item--active .m-board-item-list__item-title {
+  color: var(--text-on-accent);
+}
+.m-board-item-list__item--active .m-board-item-list__delete-btn {
+  color: var(--text-on-accent);
+}
+.m-board-item-list__item--active:hover {
+  background-color: var(--interactive-accent);
+  opacity: 0.9;
 }
 .m-board-item-list__item.is-dragging {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 .m-board-item-list__item.is-drop-target-top {
   border-top: 2px solid var(--interactive-accent);
@@ -56,25 +68,48 @@ button.a-btn--icon.delete {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 14px;
 }
 
 .m-board-item-list__delete-btn {
-  background: transparent;
-  box-shadow: none;
-  padding: 2px 6px;
-  height: auto;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px !important;
+  border-radius: 4px;
+  height: auto !important;
   color: var(--text-muted);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 .m-board-item-list__delete-btn:hover {
-  color: var(--text-error);
-  background: transparent;
+  background-color: var(--text-error) !important;
+  color: white !important;
+  opacity: 1 !important;
+}
+.m-board-item-list__delete-btn:hover svg {
+  stroke: white !important;
+  color: white !important;
 }
 
 .m-kanban-card {
   background-color: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  padding: 12px;
+  border: 1px solid transparent;
+  padding: 12px 14px;
   border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 6px;
+}
+.m-kanban-card:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.02);
+  transform: translateY(-1px);
+}
+.m-kanban-card:hover .m-kanban-card__delete-btn {
+  opacity: 0.6;
 }
 .m-kanban-card__header {
   display: flex;
@@ -86,30 +121,54 @@ button.a-btn--icon.delete {
   outline: none;
   flex: 1;
   cursor: pointer;
-  transition: color 0.2s ease;
+  font-size: 13.5px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text-normal);
 }
-.m-kanban-card__title:hover {
-  color: var(--interactive-accent);
+.m-kanban-card__delete-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px !important;
+  border-radius: 4px;
+  height: auto !important;
+  color: var(--text-muted);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+}
+.m-kanban-card__delete-btn:hover {
+  background-color: var(--text-error) !important;
+  color: white !important;
+  opacity: 1 !important;
+}
+.m-kanban-card__delete-btn:hover svg {
+  stroke: white !important;
+  color: white !important;
 }
 .m-kanban-card__tags {
   display: flex;
-  gap: 5px;
-  margin-top: 8px;
+  gap: 6px;
+  margin-top: 10px;
   flex-wrap: wrap;
 }
 .m-kanban-card__tag {
-  font-size: 10px;
-  padding: 2px 6px;
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 2px 8px;
+  background-color: rgba(var(--interactive-accent-rgb), 0.12);
+  color: var(--interactive-accent);
   border-radius: 4px;
-}
-.m-kanban-card {
-  /* Drag & Drop States */
+  letter-spacing: 0.3px;
 }
 .m-kanban-card.is-dragging {
-  opacity: 0.5;
-  transform: scale(0.98);
+  opacity: 0.3;
+  transform: scale(0.97);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.03);
 }
 .m-kanban-card.is-drop-target-top {
   border-top: 2px solid var(--interactive-accent);
@@ -120,48 +179,89 @@ button.a-btn--icon.delete {
 
 .o-kanban-column {
   background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
   min-width: 300px;
   width: 300px;
   flex-shrink: 0;
-  border-radius: 8px;
-  padding: 15px;
+  border-radius: 10px;
+  padding: 14px 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  cursor: grab;
-}
-.o-kanban-column:active {
-  cursor: grabbing;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .o-kanban-column__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0 4px 6px 4px;
+}
+.o-kanban-column__header:hover .o-kanban-column__delete-btn {
+  opacity: 0.6;
 }
 .o-kanban-column__title {
   margin: 0;
   outline: none;
   cursor: text;
   flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-normal);
 }
-.o-kanban-column__add-btn {
-  width: 100%;
-  margin-top: 10px;
+.o-kanban-column__delete-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px !important;
+  border-radius: 4px;
+  height: auto !important;
+  color: var(--text-muted);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-left: 5px;
+}
+.o-kanban-column__delete-btn:hover {
+  background-color: var(--text-error) !important;
+  color: white !important;
+  opacity: 1 !important;
+}
+.o-kanban-column__delete-btn:hover svg {
+  stroke: white !important;
+  color: white !important;
 }
 .o-kanban-column__input-container {
-  padding: 0 10px 10px 10px;
+  padding: 0 2px 6px 2px;
 }
 .o-kanban-column__input {
   width: 100%;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.o-kanban-column__input:hover {
+  background-color: var(--background-modifier-hover);
+}
+.o-kanban-column__input:focus {
+  background-color: var(--background-primary);
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.15);
 }
 .o-kanban-column.is-ghost {
   background-color: transparent;
   border: 2px dashed var(--background-modifier-border);
-  display: flex;
-  align-items: flex-start;
-  padding: 10px;
+  box-shadow: none;
 }
 .o-kanban-column.is-ghost .o-kanban-column__input {
+  background-color: transparent;
+}
+.o-kanban-column.is-ghost .o-kanban-column__input:focus {
   background-color: var(--background-primary);
 }
 
@@ -224,18 +324,68 @@ button.a-btn--icon.delete {
   margin-bottom: var(--size-4-3);
 }
 
-.o-card-modal__title {
-  outline: none;
-  border-bottom: 1px solid var(--background-modifier-border);
-  padding-bottom: 10px;
+.o-card-modal {
+  /* Header Area */
+}
+.o-card-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 20px;
+  gap: 15px;
+}
+.o-card-modal__title {
+  margin: 0;
+  outline: none;
+  flex: 1;
   cursor: text;
+  font-weight: 600;
+}
+.o-card-modal__delete-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 6px !important;
+  border-radius: 4px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.o-card-modal__delete-btn:hover {
+  background-color: var(--text-error) !important;
+  color: white !important;
+}
+.o-card-modal__delete-btn:hover svg {
+  stroke: white !important;
+  color: white !important;
+}
+.o-card-modal {
+  /* --- 70/30 Trello Layout --- */
+}
+.o-card-modal__layout {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+.o-card-modal__main {
+  flex: 0 0 65%;
+  width: 65%;
+}
+.o-card-modal__sidebar {
+  flex: 0 0 calc(35% - 30px);
+  width: calc(35% - 30px);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.o-card-modal {
+  /* Main Area Elements */
 }
 .o-card-modal__tags-input {
   width: 100%;
-}
-.o-card-modal {
-  /* --- Tabs System (GitHub Style) --- */
+  margin-bottom: 15px;
 }
 .o-card-modal__desc-section {
   display: flex;
@@ -243,21 +393,21 @@ button.a-btn--icon.delete {
 }
 .o-card-modal__tabs {
   display: flex;
-  gap: 5px;
+  gap: 4px;
   margin-bottom: -1px;
-  /* Pulls the content box up to overlap borders */
   z-index: 1;
 }
 .o-card-modal__tab {
   background: transparent;
   border: 1px solid transparent;
   border-bottom: none;
-  padding: 8px 16px;
+  padding: 6px 14px;
   cursor: pointer;
-  border-radius: 6px 6px 0 0;
+  border-radius: 4px 4px 0 0;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 13px;
   box-shadow: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .o-card-modal__tab:hover {
   color: var(--text-normal);
@@ -266,21 +416,21 @@ button.a-btn--icon.delete {
   background-color: var(--background-primary);
   border-color: var(--background-modifier-border);
   color: var(--text-normal);
-  font-weight: bold;
+  font-weight: 500;
 }
 .o-card-modal__content {
   border: 1px solid var(--background-modifier-border);
   border-radius: 0 6px 6px 6px;
   background-color: var(--background-primary);
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 .o-card-modal__preview {
-  min-height: 200px;
-  padding: 15px;
+  min-height: 150px;
+  padding: 14px;
   cursor: pointer;
-  /* Indicates it can be clicked to edit */
   user-select: text;
-  /* Styling Obsidian's markdown injection */
+  font-size: 14px;
 }
 .o-card-modal__preview p:first-child {
   margin-top: 0;
@@ -293,35 +443,108 @@ button.a-btn--icon.delete {
   font-style: italic;
 }
 .o-card-modal {
-  /* Layout classes that were in JS */
+  /* Sidebar Area Elements */
 }
 .o-card-modal__move-section {
-  margin-top: 30px;
-  padding-top: 15px;
-  border-top: 1px solid var(--background-modifier-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.o-card-modal__move-section h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
 }
 .o-card-modal__controls {
   display: flex;
-  gap: 10px;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
 }
 .o-card-modal__dropdown {
-  /* Obsidian native dropdown styling enhancement */
+  width: 100%;
   background-color: var(--background-modifier-form-field);
   border: 1px solid var(--background-modifier-border);
   color: var(--text-normal);
-  padding: 5px 10px;
+  padding: 6px 10px;
   border-radius: 4px;
+  font-size: 13px;
 }
 .o-card-modal__dropdown.is-hidden {
   display: none;
 }
+.o-card-modal__btn {
+  width: 100%;
+  font-size: 13px;
+  padding: 6px 0;
+}
 .o-card-modal__btn.is-hidden {
   display: none;
 }
-
-.margin-bottom-md {
-  margin-bottom: 15px;
+.o-card-modal__comments-section {
+  display: flex;
+  flex-direction: column;
+}
+.o-card-modal__comments-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+.o-card-modal__comment-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.o-card-modal__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.o-card-modal__comment-input-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.o-card-modal__comment-input-wrapper:focus-within {
+  background-color: var(--background-primary);
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.15);
+}
+.o-card-modal__comment-input-wrapper textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  resize: vertical;
+  min-height: 60px;
+  padding: 0;
+  font-size: 13px;
+  color: var(--text-normal);
+}
+.o-card-modal__comment-input-wrapper textarea:focus {
+  box-shadow: none;
+}
+.o-card-modal__comment-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+.o-card-modal__comment-actions button {
+  font-size: 12px;
+  padding: 4px 12px;
+  height: auto;
 }
 
 .t-kanban-view {

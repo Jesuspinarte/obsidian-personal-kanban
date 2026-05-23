@@ -1,9 +1,9 @@
-// CardController.ts
 import { Column, Card } from "types/interfaces";
 import PersonalKanbanPlugin from "main";
 import KanbanView from "views/KanbanView";
 import { BEM } from "utils/constants";
 import CardModal from "modals/CardModal";
+import { setIcon } from "obsidian";
 
 export default class CardController {
   private card: Card;
@@ -46,15 +46,20 @@ export default class CardController {
     const cardTitle = cardHeader.createEl("h4", { text: this.card.title, cls: `${BEM.MOLS.CARD}__title` });
 
     cardTitle.onclick = (e) => {
-      if ((e.target as HTMLElement).tagName === "BUTTON") return;
-      new CardModal(this.plugin.app, this.card, this.plugin, this.parentView).open();
+      if ((e.target as HTMLElement).tagName === "BUTTON" || (e.target as HTMLElement).closest('svg')) return;
+      // We now pass 'this.column' to the modal so it can delete itself
+      new CardModal(this.plugin.app, this.card, this.column, this.plugin, this.parentView).open();
     };
 
-    const deleteCardBtn = cardHeader.createEl("button", { text: "✕", cls: "a-btn--icon delete" });
+    const deleteCardBtn = cardHeader.createEl("button", { cls: `${BEM.MOLS.CARD}__delete-btn` });
+    setIcon(deleteCardBtn, "trash-2");
+
     deleteCardBtn.onclick = async () => {
-      this.column.cards = this.column.cards.filter(c => c.id !== this.card.id);
-      await this.plugin.saveSettings();
-      this.parentView.render();
+      if (confirm(`Delete "${this.card.title}"?`)) {
+        this.column.cards = this.column.cards.filter(c => c.id !== this.card.id);
+        await this.plugin.saveSettings();
+        this.parentView.render();
+      }
     };
 
     if (this.card.tags && this.card.tags.length > 0) {

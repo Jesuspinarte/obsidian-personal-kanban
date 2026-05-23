@@ -1,11 +1,22 @@
-// _card.scss
 @use '../_constants/variables' as *;
 
 .m-kanban-card {
   background-color: $bg-primary;
-  border: 1px solid $border-color;
-  padding: 12px;
+  border: 1px solid transparent;
+  padding: 12px 14px;
   border-radius: $radius-sm;
+  box-shadow: $shadow-sm;
+  transition: $transition-smooth;
+  margin-bottom: 6px;
+
+  &:hover {
+    box-shadow: $shadow-hover;
+    transform: translateY(-1px);
+
+    .m-kanban-card__delete-btn {
+      opacity: 0.6; // Show trash on card hover
+    }
+  }
 
   &__header {
     display: flex;
@@ -17,40 +28,69 @@
     margin: 0;
     outline: none;
     flex: 1;
-    cursor: pointer; // Indica que se puede hacer clic
-    transition: color 0.2s ease;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--text-normal);
+  }
+
+  // --- Trash Button Style ---
+  &__delete-btn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 4px !important;
+    border-radius: 4px;
+    height: auto !important;
+    color: $text-muted;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    margin-left: 8px;
 
     &:hover {
-      color: $accent-color;
+      background-color: var(--text-error) !important;
+      color: white !important;
+      opacity: 1 !important;
+
+      svg {
+        stroke: white !important;
+        color: white !important;
+      }
     }
   }
 
   &__tags {
     display: flex;
-    gap: 5px;
-    margin-top: 8px;
+    gap: 6px;
+    margin-top: 10px;
     flex-wrap: wrap;
   }
 
   &__tag {
-    font-size: 10px;
-    padding: 2px 6px;
-    background-color: $accent-color;
-    color: $text-on-accent;
+    font-size: 10.5px;
+    font-weight: 500;
+    padding: 2px 8px;
+    background-color: rgba(var(--interactive-accent-rgb), 0.12);
+    color: $accent-color;
     border-radius: 4px;
+    letter-spacing: 0.3px;
   }
 
-  /* Drag & Drop States */
   &.is-dragging {
-    opacity: 0.5;
-    transform: scale(0.98);
+    opacity: 0.3;
+    transform: scale(0.97);
+    box-shadow: $shadow-md;
   }
 
   &.is-drop-target-top {
-    border-top: 2px solid var(--interactive-accent);
+    border-top: 2px solid $accent-color;
   }
 
   &.is-drop-target-bottom {
-    border-bottom: 2px solid var(--interactive-accent);
+    border-bottom: 2px solid $accent-color;
   }
 }
