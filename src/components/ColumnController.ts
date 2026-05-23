@@ -11,14 +11,14 @@ export default class ColumnController {
   private plugin: PersonalKanbanPlugin;
   private parentView: KanbanView;
   private columnEl: HTMLElement;
-  private isBacklog: boolean;
+  private isLocked: boolean;
 
-  constructor(col: Column, container: HTMLElement, plugin: PersonalKanbanPlugin, parentView: KanbanView, isBacklog: boolean = false) {
+  constructor(col: Column, container: HTMLElement, plugin: PersonalKanbanPlugin, parentView: KanbanView, isLocked: boolean = false) {
     this.col = col;
     this.container = container;
     this.plugin = plugin;
     this.parentView = parentView;
-    this.isBacklog = isBacklog;
+    this.isLocked = isLocked;
   }
 
   public getColumnElement(): HTMLElement {
@@ -71,7 +71,7 @@ export default class ColumnController {
     });
 
     this.renderHeader(this.columnEl);
-    this.renderCardCreationInput(this.columnEl); // Replaces renderFooter
+    this.renderCardCreationInput(this.columnEl);
     this.renderCards(this.columnEl);
   }
 
@@ -132,30 +132,31 @@ export default class ColumnController {
     const headerContainer = columnEl.createEl("div", { cls: `${BEM.BLOCK.COLUMN}__header` });
     const titleEl = headerContainer.createEl("h3", { text: this.col.title, cls: `${BEM.BLOCK.COLUMN}__title` });
 
-    if (!this.isBacklog) {
-      titleEl.setAttribute("contenteditable", "true");
-      titleEl.addEventListener("blur", async () => {
-        const newTitle = titleEl.innerText.trim();
-        if (newTitle !== "") {
-          this.col.title = newTitle;
-          await this.plugin.saveSettings();
-          this.parentView.render();
-        } else {
-          titleEl.innerText = this.col.title;
-        }
-      });
-      titleEl.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          titleEl.blur();
-        }
-      });
-    }
+    titleEl.setAttribute("contenteditable", "true");
+
+    // Prevents drag and drop payload from pasting into the title
+    titleEl.addEventListener("drop", (e) => e.preventDefault());
+
+    titleEl.addEventListener("blur", async () => {
+      const newTitle = titleEl.innerText.trim();
+      if (newTitle !== "") {
+        this.col.title = newTitle;
+        await this.plugin.saveSettings();
+        this.parentView.render();
+      } else {
+        titleEl.innerText = this.col.title;
+      }
+    });
+    titleEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        titleEl.blur();
+      }
+    });
 
     const controls = headerContainer.createEl("div", { style: "display: flex; gap: 5px; align-items: center;" });
 
-    if (!this.isBacklog) {
-      // Move Column Dropdown
+    if (!this.isLocked) {
       const moveSelect = controls.createEl("select", { cls: "dropdown" });
       moveSelect.createEl("option", { text: "Move", value: "" });
 
@@ -180,7 +181,6 @@ export default class ColumnController {
         }
       };
 
-      // Delete Column Button
       const deleteBtn = controls.createEl("button", { text: "✕" });
       deleteBtn.onclick = async () => {
         if (confirm(`Delete column "${this.col.title}" and all its cards?`)) {
@@ -195,7 +195,6 @@ export default class ColumnController {
     }
   }
 
-  // Replaces the old renderFooter with a sleek input under the header
   private renderCardCreationInput(columnEl: HTMLElement) {
     const inputContainer = columnEl.createEl("div", { cls: `${BEM.BLOCK.COLUMN}__input-container` });
     const input = inputContainer.createEl("input", {
@@ -203,6 +202,9 @@ export default class ColumnController {
       placeholder: "Type to add a new task...",
       cls: `${BEM.BLOCK.COLUMN}__input`
     });
+
+    // Prevents drag and drop payload from pasting into the input
+    input.addEventListener("drop", (e) => e.preventDefault());
 
     input.addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
@@ -219,7 +221,6 @@ export default class ColumnController {
           await this.plugin.saveSettings();
 
           if (this.plugin.data.settings?.openModalOnCreate) {
-            // Need to render the parent view to keep DOM in sync, then open modal
             this.parentView.render();
             new CardModal(this.plugin.app, newCard, this.plugin, this.parentView).open();
           } else {

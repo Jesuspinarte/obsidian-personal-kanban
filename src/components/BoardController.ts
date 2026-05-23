@@ -1,5 +1,5 @@
 import PersonalKanbanPlugin from "main";
-import { Board } from "types/interfaces";
+import { Board, Column } from "types/interfaces";
 import { BEM } from "utils/constants";
 import KanbanView from "views/KanbanView";
 import ColumnController from "components/ColumnController";
@@ -40,6 +40,9 @@ export default class BoardController {
     const titleEl = header.createEl("h2", { text: board.title });
     titleEl.setAttribute("contenteditable", "true");
 
+    // Prevents drag and drop payload from pasting into the title
+    titleEl.addEventListener("drop", (e) => e.preventDefault());
+
     titleEl.addEventListener("blur", async () => {
       const newTitle = titleEl.innerText.trim();
       if (newTitle !== "") {
@@ -57,47 +60,29 @@ export default class BoardController {
         titleEl.blur();
       }
     });
-
-    const controls = header.createEl("div");
-    const deleteBtn = controls.createEl("button", { text: "Delete Board" });
-    deleteBtn.onclick = async () => {
-      if (confirm(`Are you sure you want to delete "${board.title}"?`)) {
-        this.plugin.data.boards = this.plugin.data.boards.filter(b => b.id !== board.id);
-        this.parentView.activeBoardId = this.plugin.data.boards.length > 0 ? this.plugin.data.boards[0]?.id : undefined;
-        await this.plugin.saveSettings();
-        this.parentView.render();
-      }
-    };
   }
 
   private renderColumns(board: Board) {
     const boardContainer = this.container.createEl("div", { cls: `${BEM.BLOCK.VIEW}__container` });
 
-    // Ensure Backlog column always exists at index 0
-    if (!board.columns.length || board.columns[0].title !== "Backlog") {
-      const existingBacklogIndex = board.columns.findIndex(c => c.title === "Backlog");
-
-      if (existingBacklogIndex > -1) {
-        const [backlog] = board.columns.splice(existingBacklogIndex, 1);
-        board.columns.unshift(backlog);
-      } else {
-        board.columns.unshift({
-          id: `col-backlog-${Date.now()}`,
-          title: "Backlog",
-          cards: []
-        });
-      }
+    if (board.columns.length === 0) {
+      board.columns.push({
+        id: `col-locked-${Date.now()}`,
+        title: "To do...",
+        cards: []
+      });
       this.plugin.saveSettings();
     }
 
     board.columns.forEach((col, index) => {
-      const isBacklog = index === 0 && col.title === "Backlog";
-      const columnComponent = new ColumnController(col, boardContainer, this.plugin, this.parentView, isBacklog);
+      const isLocked = index === 0;
+
+      const columnComponent = new ColumnController(col, boardContainer, this.plugin, this.parentView, isLocked);
       columnComponent.render();
 
       const colEl = columnComponent.getColumnElement();
 
-      if (!isBacklog) {
+      if (!isLocked) {
         colEl.setAttribute("draggable", "true");
 
         colEl.addEventListener("dragstart", (e) => {
@@ -133,13 +118,15 @@ export default class BoardController {
       }
     });
 
-    // Ghost Column for Creating New Columns
     const ghostCol = boardContainer.createEl("div", { cls: `${BEM.BLOCK.COLUMN} is-ghost` });
     const ghostInput = ghostCol.createEl("input", {
       type: "text",
       placeholder: "Type to add a new column...",
       cls: `${BEM.BLOCK.COLUMN}__input`
     });
+
+    // Prevents drag and drop payload from pasting into the input
+    ghostInput.addEventListener("drop", (e) => e.preventDefault());
 
     ghostInput.addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {

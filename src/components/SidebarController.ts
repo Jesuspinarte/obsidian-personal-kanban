@@ -22,11 +22,10 @@ export default class SidebarController {
   }
 
   private renderSettingsToggle() {
-    const toggleContainer = this.container.createEl("div", { cls: "b-sidebar__toggle-container" });
+    const toggleContainer = this.container.createEl("div", { cls: ".m-board-item-list__toggle-container" });
     toggleContainer.createEl("label", { text: "Auto-open card modal" });
     const toggle = toggleContainer.createEl("input", { type: "checkbox" });
 
-    // Initialize settings if they don't exist
     if (!this.plugin.data.settings) {
       this.plugin.data.settings = { openModalOnCreate: false };
     }
@@ -45,8 +44,11 @@ export default class SidebarController {
     const input = this.container.createEl("input", {
       type: "text",
       placeholder: "Type to add board...",
-      cls: "b-sidebar__input"
+      cls: ".m-board-item-list__input"
     });
+
+    // Prevents drag and drop payload from pasting into the input
+    input.addEventListener("drop", (e) => e.preventDefault());
 
     input.addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
@@ -56,7 +58,7 @@ export default class SidebarController {
           const newBoard: Board = {
             id: `board-${Date.now()}`,
             title: title,
-            columns: [{ id: `col-backlog-${Date.now()}`, title: "Backlog", cards: [] }]
+            columns: [{ id: `col-locked-${Date.now()}`, title: "To do...", cards: [] }]
           };
           this.plugin.data.boards.push(newBoard);
           this.parentView.activeBoardId = newBoard.id;
@@ -69,30 +71,56 @@ export default class SidebarController {
 
   private renderBoardList() {
     this.plugin.data.boards.forEach((board, index) => {
-      const btn = this.container.createEl("button", { text: board.title, cls: `${BEM.BLOCK.SIDEBAR}__btn` });
-      btn.setAttribute("draggable", "true");
+      const itemEl = this.container.createEl("div", { cls: ".m-board-item-list__item" });
+      itemEl.setAttribute("draggable", "true");
 
-      btn.addEventListener("dragstart", (e) => {
+      const titleEl = itemEl.createEl("span", { text: board.title, cls: ".m-board-item-list__item-title" });
+      const deleteBtn = itemEl.createEl("button", { text: "✕", cls: ".m-board-item-list__delete-btn" });
+
+      deleteBtn.onclick = async (e) => {
+        e.stopPropagation();
+        if (confirm(`Are you sure you want to delete "${board.title}"?`)) {
+          this.plugin.data.boards = this.plugin.data.boards.filter(b => b.id !== board.id);
+
+          if (this.parentView.activeBoardId === board.id) {
+            this.parentView.activeBoardId = this.plugin.data.boards.length > 0 ? this.plugin.data.boards[0]?.id : undefined;
+          }
+
+          await this.plugin.saveSettings();
+          this.parentView.render();
+        }
+      };
+
+      titleEl.onclick = () => {
+        this.parentView.activeBoardId = board.id;
+        this.parentView.render();
+      };
+
+      if (board.id === this.parentView.activeBoardId) {
+        itemEl.classList.add(".m-board-item-list__item--active");
+      }
+
+      itemEl.addEventListener("dragstart", (e) => {
         e.dataTransfer!.setData("text/plain", index.toString());
-        btn.classList.add("is-dragging");
+        itemEl.classList.add("is-dragging");
       });
 
-      btn.addEventListener("dragend", () => {
-        btn.classList.remove("is-dragging");
+      itemEl.addEventListener("dragend", () => {
+        itemEl.classList.remove("is-dragging");
       });
 
-      btn.addEventListener("dragover", (e) => {
+      itemEl.addEventListener("dragover", (e) => {
         e.preventDefault();
-        btn.classList.add("is-drop-target-top");
+        itemEl.classList.add("is-drop-target-top");
       });
 
-      btn.addEventListener("dragleave", () => {
-        btn.classList.remove("is-drop-target-top");
+      itemEl.addEventListener("dragleave", () => {
+        itemEl.classList.remove("is-drop-target-top");
       });
 
-      btn.addEventListener("drop", async (e) => {
+      itemEl.addEventListener("drop", async (e) => {
         e.preventDefault();
-        btn.classList.remove("is-drop-target-top");
+        itemEl.classList.remove("is-drop-target-top");
 
         const draggedIndex = parseInt(e.dataTransfer!.getData("text/plain"));
         const targetIndex = index;
@@ -106,15 +134,6 @@ export default class SidebarController {
           this.parentView.render();
         }
       });
-
-      if (board.id === this.parentView.activeBoardId) {
-        btn.classList.add(`${BEM.BLOCK.SIDEBAR}__btn--active`);
-      }
-
-      btn.onclick = () => {
-        this.parentView.activeBoardId = board.id;
-        this.parentView.render();
-      };
     });
   }
 }
