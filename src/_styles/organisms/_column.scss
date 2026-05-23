@@ -16,13 +16,19 @@
 
   &__header {
     display: flex;
+    flex-direction: column;
+    padding: 0 4px 6px 4px;
+  }
+
+  &__title-group {
+    display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 4px 6px 4px;
+    width: 100%;
 
     &:hover {
-      .o-kanban-column__delete-btn {
-        opacity: 0.6;
+      .o-kanban-column__actions {
+        opacity: 1;
       }
     }
   }
@@ -37,8 +43,15 @@
     color: var(--text-normal);
   }
 
-  // --- Trash Button Style ---
-  &__delete-btn {
+  &__actions {
+    opacity: 0;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    transition: opacity 0.2s ease;
+  }
+
+  &__icon-btn {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
@@ -46,22 +59,46 @@
     border-radius: 4px;
     height: auto !important;
     color: $text-muted;
-    opacity: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    margin-left: 5px;
 
     &:hover {
-      background-color: var(--text-error) !important;
-      color: white !important;
-      opacity: 1 !important;
+      background-color: var(--background-modifier-hover) !important;
+      color: var(--text-normal) !important;
+    }
 
-      svg {
-        stroke: white !important;
+    &--delete {
+      &:hover {
+        background-color: var(--text-error) !important;
         color: white !important;
+
+        svg {
+          stroke: white !important;
+        }
       }
+    }
+  }
+
+  &__move-panel {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed $border-color;
+
+    &.is-visible {
+      display: flex;
+    }
+
+    select {
+      flex: 1;
+      background-color: var(--background-primary);
+      border: 1px solid $border-color;
+      border-radius: 4px;
+      padding: 4px 8px;
     }
   }
 

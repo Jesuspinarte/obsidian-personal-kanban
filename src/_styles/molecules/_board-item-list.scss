@@ -38,7 +38,6 @@
 
   &--active {
     background-color: $accent-color;
-    color: $text-on-accent;
     font-weight: 500;
 
     .m-board-item-list__item-title {
@@ -70,6 +69,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 14px;
+  color: var(--text-normal);
 }
 
 // --- Trash Button Global Hover Style ---

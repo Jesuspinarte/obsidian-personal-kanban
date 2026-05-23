@@ -33,13 +33,17 @@ export default class CardTransferController {
     });
 
     const colSelect = controlsDiv.createEl("select", { cls: "o-card-modal__dropdown is-hidden" });
-    const moveBtn = controlsDiv.createEl("button", { text: "Send Card", cls: "mod-cta o-card-modal__btn is-hidden" });
+
+    // Grouping buttons for side-by-side layout
+    const btnGroup = controlsDiv.createEl("div", { cls: "o-card-modal__transfer-btns is-hidden" });
+    const cancelBtn = btnGroup.createEl("button", { text: "Cancel", cls: "o-card-modal__btn" });
+    const moveBtn = btnGroup.createEl("button", { text: "Send Card", cls: "mod-cta o-card-modal__btn" });
 
     boardSelect.onchange = () => {
       const targetId = boardSelect.value;
       if (!targetId) {
         colSelect.classList.add("is-hidden");
-        moveBtn.classList.add("is-hidden");
+        btnGroup.classList.add("is-hidden");
         return;
       }
 
@@ -51,7 +55,13 @@ export default class CardTransferController {
       });
 
       colSelect.classList.remove("is-hidden");
-      moveBtn.classList.remove("is-hidden");
+      btnGroup.classList.remove("is-hidden");
+    };
+
+    cancelBtn.onclick = () => {
+      boardSelect.value = "";
+      colSelect.classList.add("is-hidden");
+      btnGroup.classList.add("is-hidden");
     };
 
     moveBtn.onclick = async () => {

@@ -1,4 +1,3 @@
-// _kanban-view.scss
 @use '../_constants/variables' as *;
 
 .t-kanban-view {
@@ -7,7 +6,7 @@
   display: flex;
   flex-direction: column;
   overflow-x: auto;
-  overflow-y: hidden; // Keeps scroll horizontal
+  overflow-y: auto;
 
   &__header {
     display: flex;
@@ -17,7 +16,6 @@
     margin-bottom: $spacing-lg;
   }
 
-  // Aligns the Toggle Button and the Title
   &__header-left {
     display: flex;
     align-items: center;
@@ -27,17 +25,17 @@
       margin: 0;
       outline: none;
       cursor: text;
+      color: var(--text-normal);
     }
   }
 
-  // The Magic: Puts columns side by side
   &__container {
     display: flex;
-    flex-direction: row; // Forces horizontal alignment
+    flex-direction: row;
     gap: 16px;
     height: 100%;
     align-items: flex-start;
-    flex-wrap: nowrap; // Prevents columns from dropping to the next line
+    flex-wrap: nowrap;
     padding-bottom: 20px;
   }
 }

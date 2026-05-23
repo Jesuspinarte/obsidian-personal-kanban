@@ -43,7 +43,6 @@ button.a-btn--icon.delete {
 }
 .m-board-item-list__item--active {
   background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
   font-weight: 500;
 }
 .m-board-item-list__item--active .m-board-item-list__item-title {
@@ -69,6 +68,7 @@ button.a-btn--icon.delete {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 14px;
+  color: var(--text-normal);
 }
 
 .m-board-item-list__delete-btn {
@@ -193,12 +193,17 @@ button.a-btn--icon.delete {
 }
 .o-kanban-column__header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   padding: 0 4px 6px 4px;
 }
-.o-kanban-column__header:hover .o-kanban-column__delete-btn {
-  opacity: 0.6;
+.o-kanban-column__title-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.o-kanban-column__title-group:hover .o-kanban-column__actions {
+  opacity: 1;
 }
 .o-kanban-column__title {
   margin: 0;
@@ -209,7 +214,14 @@ button.a-btn--icon.delete {
   font-weight: 600;
   color: var(--text-normal);
 }
-.o-kanban-column__delete-btn {
+.o-kanban-column__actions {
+  opacity: 0;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  transition: opacity 0.2s ease;
+}
+.o-kanban-column__icon-btn {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -217,21 +229,39 @@ button.a-btn--icon.delete {
   border-radius: 4px;
   height: auto !important;
   color: var(--text-muted);
-  opacity: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  margin-left: 5px;
 }
-.o-kanban-column__delete-btn:hover {
+.o-kanban-column__icon-btn:hover {
+  background-color: var(--background-modifier-hover) !important;
+  color: var(--text-normal) !important;
+}
+.o-kanban-column__icon-btn--delete:hover {
   background-color: var(--text-error) !important;
   color: white !important;
-  opacity: 1 !important;
 }
-.o-kanban-column__delete-btn:hover svg {
+.o-kanban-column__icon-btn--delete:hover svg {
   stroke: white !important;
-  color: white !important;
+}
+.o-kanban-column__move-panel {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--background-modifier-border);
+}
+.o-kanban-column__move-panel.is-visible {
+  display: flex;
+}
+.o-kanban-column__move-panel select {
+  flex: 1;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 4px 8px;
 }
 .o-kanban-column__input-container {
   padding: 0 2px 6px 2px;
@@ -279,6 +309,7 @@ button.a-btn--icon.delete {
 .o-kanban-sidebar__title {
   margin-bottom: 10px;
   transition: opacity 0.2s ease;
+  color: var(--text-normal);
 }
 .o-kanban-sidebar__btn {
   width: 100%;
@@ -325,14 +356,37 @@ button.a-btn--icon.delete {
 }
 
 .o-card-modal {
-  /* Header Area */
+  /* --- TRELLO LAYOUT (70/30) --- */
 }
-.o-card-modal__header {
+.o-card-modal__layout {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+.o-card-modal__main {
+  flex: 0 0 68%;
+  width: 68%;
+}
+.o-card-modal__sidebar {
+  flex: 0 0 calc(32% - 30px);
+  width: calc(32% - 30px);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 50px;
+}
+.o-card-modal {
+  /* Main Area Elements */
+}
+.o-card-modal__title-group {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   gap: 15px;
+}
+.o-card-modal__title-group:hover .o-card-modal__delete-btn {
+  opacity: 1;
 }
 .o-card-modal__title {
   margin: 0;
@@ -348,6 +402,7 @@ button.a-btn--icon.delete {
   padding: 6px !important;
   border-radius: 4px;
   color: var(--text-muted);
+  opacity: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -361,73 +416,61 @@ button.a-btn--icon.delete {
   stroke: white !important;
   color: white !important;
 }
-.o-card-modal {
-  /* --- 70/30 Trello Layout --- */
-}
-.o-card-modal__layout {
-  display: flex;
-  gap: 30px;
-  align-items: flex-start;
-}
-.o-card-modal__main {
-  flex: 0 0 65%;
-  width: 65%;
-}
-.o-card-modal__sidebar {
-  flex: 0 0 calc(35% - 30px);
-  width: calc(35% - 30px);
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-.o-card-modal {
-  /* Main Area Elements */
+.o-card-modal__section-title {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 6px 0;
+  font-weight: 500;
 }
 .o-card-modal__tags-input {
   width: 100%;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 .o-card-modal__desc-section {
   display: flex;
   flex-direction: column;
 }
+.o-card-modal {
+  /* --- Tabs System --- */
+}
 .o-card-modal__tabs {
   display: flex;
   gap: 4px;
-  margin-bottom: -1px;
-  z-index: 1;
+  border-bottom: 1px solid var(--background-modifier-border);
 }
 .o-card-modal__tab {
-  background: transparent;
+  background-color: transparent !important;
   border: 1px solid transparent;
   border-bottom: none;
-  padding: 6px 14px;
+  padding: 8px 16px;
   cursor: pointer;
-  border-radius: 4px 4px 0 0;
+  border-radius: 6px 6px 0 0;
   color: var(--text-muted);
   font-size: 13px;
-  box-shadow: none;
+  box-shadow: none !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: -1px;
 }
 .o-card-modal__tab:hover {
   color: var(--text-normal);
 }
 .o-card-modal__tab.is-active {
-  background-color: var(--background-primary);
+  background-color: var(--background-secondary);
   border-color: var(--background-modifier-border);
+  border-bottom-color: var(--background-secondary);
   color: var(--text-normal);
   font-weight: 500;
 }
 .o-card-modal__content {
   border: 1px solid var(--background-modifier-border);
-  border-radius: 0 6px 6px 6px;
-  background-color: var(--background-primary);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  background-color: var(--background-secondary);
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 .o-card-modal__preview {
   min-height: 150px;
-  padding: 14px;
+  padding: 16px;
   cursor: pointer;
   user-select: text;
   font-size: 14px;
@@ -472,13 +515,17 @@ button.a-btn--icon.delete {
 .o-card-modal__dropdown.is-hidden {
   display: none;
 }
+.o-card-modal__transfer-btns {
+  display: flex;
+  gap: 8px;
+}
+.o-card-modal__transfer-btns.is-hidden {
+  display: none;
+}
 .o-card-modal__btn {
-  width: 100%;
+  flex: 1;
   font-size: 13px;
   padding: 6px 0;
-}
-.o-card-modal__btn.is-hidden {
-  display: none;
 }
 .o-card-modal__comments-section {
   display: flex;
@@ -489,25 +536,11 @@ button.a-btn--icon.delete {
   font-weight: 600;
   margin: 0 0 10px 0;
 }
-.o-card-modal__comment-box {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.o-card-modal__avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background-color: var(--interactive-accent);
-  color: var(--text-on-accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 11px;
-  flex-shrink: 0;
+.o-card-modal {
+  /* --- Avatar INSIDE the Input Wrapper --- */
 }
 .o-card-modal__comment-input-wrapper {
+  position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -515,7 +548,7 @@ button.a-btn--icon.delete {
   background-color: var(--background-secondary);
   border: 1px solid var(--background-modifier-border);
   border-radius: 6px;
-  padding: 8px 12px;
+  padding: 10px 10px 10px 48px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .o-card-modal__comment-input-wrapper:focus-within {
@@ -529,13 +562,29 @@ button.a-btn--icon.delete {
   border: none;
   box-shadow: none;
   resize: vertical;
-  min-height: 60px;
+  min-height: 50px;
   padding: 0;
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--text-normal);
 }
 .o-card-modal__comment-input-wrapper textarea:focus {
   box-shadow: none;
+}
+.o-card-modal__avatar {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 11px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 .o-card-modal__comment-actions {
   display: flex;
@@ -553,7 +602,7 @@ button.a-btn--icon.delete {
   display: flex;
   flex-direction: column;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 .t-kanban-view__header {
   display: flex;
@@ -571,6 +620,7 @@ button.a-btn--icon.delete {
   margin: 0;
   outline: none;
   cursor: text;
+  color: var(--text-normal);
 }
 .t-kanban-view__container {
   display: flex;

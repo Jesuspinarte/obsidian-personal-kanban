@@ -131,7 +131,10 @@ export default class ColumnController {
 
   private renderHeader(columnEl: HTMLElement) {
     const headerContainer = columnEl.createEl("div", { cls: `${BEM.ORGS.COLUMN}__header` });
-    const titleEl = headerContainer.createEl("h3", { text: this.col.title, cls: `${BEM.ORGS.COLUMN}__title` });
+
+    // Title Group Container (Hover controls visibility)
+    const titleGroup = headerContainer.createEl("div", { cls: `${BEM.ORGS.COLUMN}__title-group` });
+    const titleEl = titleGroup.createEl("h3", { text: this.col.title, cls: `${BEM.ORGS.COLUMN}__title` });
 
     titleEl.setAttribute("contenteditable", "true");
     titleEl.addEventListener("drop", (e) => e.preventDefault());
@@ -153,11 +156,33 @@ export default class ColumnController {
       }
     });
 
-    const controls = headerContainer.createEl("div", { style: "display: flex; gap: 5px; align-items: center;" });
-
     if (!this.isLocked) {
-      const moveSelect = controls.createEl("select", { cls: "dropdown" });
-      moveSelect.createEl("option", { text: "Move", value: "" });
+      const actions = titleGroup.createEl("div", { cls: `${BEM.ORGS.COLUMN}__actions` });
+
+      // Move Icon Button
+      const moveIconBtn = actions.createEl("button", { cls: `${BEM.ORGS.COLUMN}__icon-btn` });
+      setIcon(moveIconBtn, "arrow-right-left");
+
+      // Trash Icon Button
+      const deleteBtn = actions.createEl("button", { cls: `${BEM.ORGS.COLUMN}__icon-btn ${BEM.ORGS.COLUMN}__icon-btn--delete` });
+      setIcon(deleteBtn, "trash-2");
+
+      deleteBtn.onclick = async () => {
+        if (confirm(`Delete column "${this.col.title}" and all its cards?`)) {
+          const activeBoard = this.plugin.data.boards.find(b => b.id === this.parentView.activeBoardId);
+          if (activeBoard) {
+            activeBoard.columns = activeBoard.columns.filter(c => c.id !== this.col.id);
+            await this.plugin.saveSettings();
+            this.parentView.render();
+          }
+        }
+      };
+
+      // --- Dropdown Move Panel (Hidden by default) ---
+      const movePanel = headerContainer.createEl("div", { cls: `${BEM.ORGS.COLUMN}__move-panel` });
+
+      const moveSelect = movePanel.createEl("select", { cls: "dropdown" });
+      moveSelect.createEl("option", { text: "Select Board...", value: "" });
 
       this.plugin.data.boards.forEach(b => {
         if (b.id !== this.parentView.activeBoardId) {
@@ -180,19 +205,32 @@ export default class ColumnController {
         }
       };
 
-      const deleteBtn = controls.createEl("button", { cls: `${BEM.ORGS.COLUMN}__delete-btn` });
-      setIcon(deleteBtn, "trash-2");
+      const cancelMoveBtn = movePanel.createEl("button", { cls: "a-btn--icon" });
+      setIcon(cancelMoveBtn, "x");
 
-      deleteBtn.onclick = async () => {
-        if (confirm(`Delete column "${this.col.title}" and all its cards?`)) {
-          const activeBoard = this.plugin.data.boards.find(b => b.id === this.parentView.activeBoardId);
-          if (activeBoard) {
-            activeBoard.columns = activeBoard.columns.filter(c => c.id !== this.col.id);
-            await this.plugin.saveSettings();
-            this.parentView.render();
-          }
+      // Click outside and toggle logic
+      const closePanel = () => {
+        movePanel.classList.remove("is-visible");
+        document.removeEventListener("click", outsideClickListener);
+      };
+
+      const outsideClickListener = (e: MouseEvent) => {
+        if (!movePanel.contains(e.target as Node) && !moveIconBtn.contains(e.target as Node)) {
+          closePanel();
         }
       };
+
+      moveIconBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (movePanel.classList.contains("is-visible")) {
+          closePanel();
+        } else {
+          movePanel.classList.add("is-visible");
+          document.addEventListener("click", outsideClickListener);
+        }
+      };
+
+      cancelMoveBtn.onclick = closePanel;
     }
   }
 
@@ -222,7 +260,6 @@ export default class ColumnController {
 
           if (this.plugin.data.settings?.openModalOnCreate) {
             this.parentView.render();
-            // Pass this.col to the Modal
             new CardModal(this.plugin.app, newCard, this.col, this.plugin, this.parentView).open();
           } else {
             this.parentView.render();

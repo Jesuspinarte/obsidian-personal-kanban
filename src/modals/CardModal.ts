@@ -36,13 +36,17 @@ export default class CardModal extends Modal {
     contentEl.empty();
     contentEl.addClass("o-card-modal");
 
-    // Make modal wider to accommodate the 70/30 layout comfortably
     this.modalEl.style.width = "75vw";
     this.modalEl.style.maxWidth = "900px";
 
-    // --- HEADER ---
-    const headerEl = contentEl.createEl("div", { cls: "o-card-modal__header" });
-    const titleEl = headerEl.createEl("h2", { text: this.card.title, cls: "o-card-modal__title" });
+    // --- TRELLO LAYOUT (68/32) ---
+    const layoutEl = contentEl.createEl("div", { cls: "o-card-modal__layout" });
+    const mainEl = layoutEl.createEl("div", { cls: "o-card-modal__main" });
+    const sidebarEl = layoutEl.createEl("div", { cls: "o-card-modal__sidebar" });
+
+    // --- MAIN SECTION ---
+    const titleGroup = mainEl.createEl("div", { cls: "o-card-modal__title-group" });
+    const titleEl = titleGroup.createEl("h2", { text: this.card.title, cls: "o-card-modal__title" });
 
     titleEl.setAttribute("contenteditable", "true");
     titleEl.addEventListener("blur", () => {
@@ -54,7 +58,7 @@ export default class CardModal extends Modal {
       if (e.key === "Enter") { e.preventDefault(); titleEl.blur(); }
     });
 
-    const deleteBtn = headerEl.createEl("button", { cls: "o-card-modal__delete-btn" });
+    const deleteBtn = titleGroup.createEl("button", { cls: "o-card-modal__delete-btn" });
     setIcon(deleteBtn, "trash-2");
 
     deleteBtn.onclick = async () => {
@@ -66,15 +70,10 @@ export default class CardModal extends Modal {
       }
     };
 
-    // --- TRELLO LAYOUT (70/30) ---
-    const layoutEl = contentEl.createEl("div", { cls: "o-card-modal__layout" });
-    const mainEl = layoutEl.createEl("div", { cls: "o-card-modal__main" });
-    const sidebarEl = layoutEl.createEl("div", { cls: "o-card-modal__sidebar" });
-
-    // --- MAIN SECTION (70%) ---
+    mainEl.createEl("h4", { text: "Tags", cls: "o-card-modal__section-title" });
     const tagsInput = mainEl.createEl("input", { type: "text", cls: "o-card-modal__tags-input" });
     tagsInput.value = this.card.tags ? this.card.tags.join(" ") : "";
-    tagsInput.placeholder = "Tags: #urgent #frontend (Separate by spaces)";
+    tagsInput.placeholder = "e.g. #urgent #frontend";
     tagsInput.addEventListener("blur", () => {
       this.card.tags = tagsInput.value.split(" ").filter(t => t.trim() !== "");
     });
@@ -107,7 +106,7 @@ export default class CardModal extends Modal {
       }
     });
 
-    // --- SIDEBAR SECTION (30%) ---
+    // --- SIDEBAR SECTION ---
     const moveController = new CardTransferController(this.card, sidebarEl, this.plugin, this.parentView, () => this.close());
     moveController.render();
 
@@ -118,10 +117,10 @@ export default class CardModal extends Modal {
     const commentsSection = sidebarEl.createEl("div", { cls: "o-card-modal__comments-section" });
     commentsSection.createEl("h3", { text: "Comments" });
 
-    const commentBox = commentsSection.createEl("div", { cls: "o-card-modal__comment-box" });
-    commentBox.createEl("div", { text: "ME", cls: "o-card-modal__avatar" });
+    // The wrapper holds the textarea and the avatar is placed absolutely over it via CSS
+    const inputWrapper = commentsSection.createEl("div", { cls: "o-card-modal__comment-input-wrapper" });
+    inputWrapper.createEl("div", { text: "ME", cls: "o-card-modal__avatar" });
 
-    const inputWrapper = commentBox.createEl("div", { cls: "o-card-modal__comment-input-wrapper" });
     const textarea = inputWrapper.createEl("textarea", { placeholder: "Write a comment..." });
 
     const actions = inputWrapper.createEl("div", { cls: "o-card-modal__comment-actions" });
@@ -207,7 +206,7 @@ export default class CardModal extends Modal {
             { key: "Escape", run: () => { this.setMode('preview'); return true; } }
           ]),
           EditorView.theme({
-            "&": { backgroundColor: "var(--background-primary)", color: "var(--text-normal)", minHeight: "200px", fontSize: "14px" },
+            "&": { backgroundColor: "var(--background-secondary)", color: "var(--text-normal)", minHeight: "200px", fontSize: "14px" },
             "&.cm-focused": { outline: "none" },
             ".cm-content": { padding: "15px", fontFamily: "var(--font-text)" },
             ".cm-strong": { fontWeight: "bold", color: "var(--text-normal)" },
@@ -215,7 +214,7 @@ export default class CardModal extends Modal {
             ".cm-link": { color: "var(--text-accent)", textDecoration: "underline" },
             ".cm-header": { color: "var(--text-title-h2)", fontWeight: "bold" },
             ".cm-quote": { color: "var(--text-muted)", fontStyle: "italic", borderLeft: "2px solid var(--interactive-accent)", paddingLeft: "5px" },
-            ".cm-inlineCode": { backgroundColor: "var(--background-secondary)", padding: "2px 4px", borderRadius: "4px", fontFamily: "monospace" }
+            ".cm-inlineCode": { backgroundColor: "var(--background-primary)", padding: "2px 4px", borderRadius: "4px", fontFamily: "monospace" }
           })
         ]
       }),
