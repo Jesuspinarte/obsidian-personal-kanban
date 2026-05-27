@@ -3,6 +3,7 @@ import { DEFAULT_DATA } from 'data/data';
 import { Plugin, WorkspaceLeaf } from 'obsidian';
 import { PluginData } from 'types/interfaces';
 import { PERSONAL_KANBAN_VIEW_TYPE } from 'utils/constants';
+import { KanbanSvelteView } from 'views/KanbanSvelteView';
 import KanbanView from 'views/KanbanView';
 
 export default class PersonalKanbanPlugin extends Plugin {
@@ -12,9 +13,14 @@ export default class PersonalKanbanPlugin extends Plugin {
 		await this.loadSettings();
 
 		// Rigisters the view
+		// this.registerView(
+		// 	PERSONAL_KANBAN_VIEW_TYPE,
+		// 	(leaf) => new KanbanView(leaf, this)
+		// );
+
 		this.registerView(
 			PERSONAL_KANBAN_VIEW_TYPE,
-			(leaf) => new KanbanView(leaf, this)
+			(leaf) => new KanbanSvelteView(leaf)
 		);
 
 		this.addCommand({

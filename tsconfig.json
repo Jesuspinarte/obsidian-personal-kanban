@@ -22,9 +22,12 @@
 			"ES5",
 			"ES6",
 			"ES7"
-		]
+		],
+		"verbatimModuleSyntax": true,
+		"skipLibCheck": true,
 	},
 	"include": [
-		"src/**/*.ts"
+		"src/**/*.ts",
+		"src/**/*.svelte"
 	]
 }
